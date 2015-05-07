@@ -15,7 +15,7 @@ import neural2d.Command.JoinableResult;
  * <p>
  *
  * <p>
- ** Copyright Michael C. Whidden 2015
+ * Copyright Michael C. Whidden 2015
  * @author Michael C. Whidden
  */
 public abstract class Neuron implements NetElement
@@ -132,21 +132,6 @@ public abstract class Neuron implements NetElement
     abstract void setBiasConnection(Connection c);
 
     abstract void addForwardConnection(Connection c);
-
-    public void saveWeights(StringBuilder buff)
-    {
-        for (Connection conn : backConnections) {
-            buff.append("<connectionWeight fromLayer=\"");
-            buff.append(conn.getFromNeuron().getLayer().getName());
-            buff.append("\" fromRow=\"");
-            buff.append(conn.getFromNeuron().getRow());
-            buff.append("\" fromColumn=\"");
-            buff.append(conn.getFromNeuron().getColumn());
-            buff.append("\">\n\t");
-            buff.append(conn.getWeight());
-            buff.append("\n</connectionWeight>\n");
-        }
-    }
 
     public int getColumn()
     {

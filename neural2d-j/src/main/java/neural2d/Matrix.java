@@ -8,7 +8,7 @@ import neural2d.config.MatrixConfig;
  * <p>
  *
  * <p>
- ** Copyright Michael C. Whidden 2015
+ * Copyright (c) 2015 Michael C. Whidden
  * @author Michael C. Whidden
  */
 public class Matrix

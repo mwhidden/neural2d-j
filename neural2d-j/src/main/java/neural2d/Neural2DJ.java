@@ -3,7 +3,6 @@ package neural2d;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import neural2d.config.ConfigurationException;
 import neural2d.config.NetConfig;
@@ -11,7 +10,7 @@ import neural2d.config.SampleConfig;
 
 /**
  *
- ** Copyright Michael C. Whidden 2015
+ * Copyright (c) 2015 Michael C. Whidden
  * @author mwhidden
  */
 public class Neural2DJ
@@ -26,12 +25,10 @@ public class Neural2DJ
     private NetConfig config;
 
     // To train the net:
-    // Neural2DJ <topology config> <input data> --train <weight file>
+    // Neural2DJ train <NOM> <inputs> <trained NOM>
     // To use a trained on on some input data:
-    // Neural2DJ <topology config> <input data> <weight file>
-    // TODO: After training, combine topology and weight file into a
-    // single trained-network config file
-    public static void main(String[] args) throws Net.LayerException, Net.SampleException, ConfigurationException, IOException, Net.FileFormatException
+    // Neural2DJ run <NOM> <inputs>
+    public static void main(String[] args) throws Exception
     {
         /*
          Perhaps someday generate images of the network...?
@@ -73,9 +70,6 @@ public class Neural2DJ
 
     private void parseArgs(String[] args) throws ConfigurationException, Net.SampleException
     {
-        // We need two or three filenames -- we can define them here, or get them from
-        // the command line. If they are specified on the command line, they must be in
-        // the order: topology, input-data, and optionally, weights.
         for (String arg : args) {
             if (mode == null) {
                 try {
@@ -144,10 +138,6 @@ public class Neural2DJ
         myNet = new Net(config);   // Create net, neurons, and connections
         myNet.sampleSet.loadSamples(SampleConfig.parseConfig(inputs,
                 mode != Mode.RUN));
-
-        if (mode == Mode.TRAIN) {
-            myNet.reportEveryNth = 10;
-        }
     }
 
     public void run() throws Net.SampleException, ConfigurationException

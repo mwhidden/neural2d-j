@@ -4,7 +4,7 @@ package neural2d;
  * <p>
  * <p>
  * <p>
- ** Copyright Michael C. Whidden 2015
+ * Copyright (c) 2015 Michael C. Whidden
  * @author Michael C. Whidden
  */
 public enum LayerType {

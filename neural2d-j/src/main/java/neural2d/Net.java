@@ -14,7 +14,7 @@ import neural2d.config.TrainingParameters;
 import neural2d.config.WeightsConfig;
 
 /**
- ** Copyright Michael C. Whidden 2015
+ * Copyright (c) 2015 Michael C. Whidden
  * @author Michael C. Whidden
  */
 public class Net implements NetElement
@@ -26,21 +26,12 @@ public class Net implements NetElement
     // result:
     int reportEveryNth;
 
-    String weightsFilename;     // Filename to use in saveWeights() and loadWeights()
-
     int inputSampleNumber; // Increments each time feedForward() is called
     float error;                // Overall net error
     float recentAverageError;   // Averaged over recentAverageSmoothingFactor samples
     float eta;
     TrainingParameters trainingParams;
     SampleSet sampleSet;
-
-    // Here is where we store all the weighted connections. The container can get
-    // reallocated, so we'll only refer to elements by indices, not by pointers or
-    // references. This also allows us to hack on the connections container during
-    // training if we want to, by dynamically adding or deleting connections without
-    // invalidating references.
-    //private final List<Connection> connections;
 
     private BiasNeuron biasNeuron;  // Fake neuron with constant output 1.0
     private List<Layer> layers;
@@ -55,7 +46,6 @@ public class Net implements NetElement
     public Net(NetConfig config) throws ConfigurationException
     {
         reportEveryNth = 1;
-        weightsFilename = "weights.txt";
         inputSampleNumber = 0;         // Increments each time feedForward() is called
         error = 1.0f;
         recentAverageError = 1.0f;
@@ -183,9 +173,6 @@ public class Net implements NetElement
         // we can form stable references to neurons):
 
         for (int row = 0; row < layer.getNumRows(); ++row) {
-
-            System.out.println("\r" + row + "/" + layer.getNumRows()); // Progress Indicator
-
             for (int col = 0; col < layer.getNumColumns(); ++col) {
                 // When we create a neuron, we have to give it a pointer to the
                 // start of the array of Connection objects:
@@ -196,7 +183,7 @@ public class Net implements NetElement
                 // that have no input connections to the neurons. Else, we must make connections
                 // to the source neurons and, for classic neurons, to a bias input:
 
-                if (layerFrom != null) {
+                if (layer.getLayerType() != LayerType.INPUT) {
                     connectNeuron(layer, layerFrom, neuron,
                                   row, col);
                     if (!layer.isConvolutionLayer()) {
@@ -205,8 +192,6 @@ public class Net implements NetElement
                 }
             }
         }
-
-        System.out.println(); // End the progress indicator
     }
 
     // Assuming an ellipse centered at 0,0 and aligned with the global axes, returns
@@ -222,6 +207,9 @@ public class Net implements NetElement
     // This creates the initial set of connections for a layer of neurons. (If the same layer
     // appears again in the topology config file, those additional connections must be added
     // to existing connections by calling addToLayer() instead of this function.
+    //
+    // TODO: implement the 'addToLayer'-type feature to allow multiple layers to
+    // feed to a single forward layer.
     //
     // Neurons can be "regular" neurons, or convolution nodes. If a convolution matrix is
     // defined for the layer, the neurons in that layer will be connected to source neurons
@@ -540,6 +528,7 @@ public class Net implements NetElement
 
     public void train() throws SampleException
     {
+        reportEveryNth = trainingParams.getReportEveryNth();
         if (trainingParams.shuffleInputSamples()) {
             sampleSet.shuffle();
         }
@@ -569,6 +558,8 @@ public class Net implements NetElement
 
     private boolean run(boolean validate) throws SampleException
     {
+        reportEveryNth = 1;
+
         Layer lastLayer = layers.get(layers.size()-1);
         for (int sampleIdx = 0; sampleIdx < sampleSet.getSamples().size(); ++sampleIdx) {
             Sample sample = sampleSet.getSamples().get(sampleIdx);

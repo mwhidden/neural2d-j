@@ -10,7 +10,7 @@ import neural2d.config.LayerConfig;
 
 /**
  * <p>
- ** Copyright Michael C. Whidden 2015
+ * Copyright (c) 2015 Michael C. Whidden
  * @author Michael C. Whidden
  */
 public abstract class Layer implements NetElement
@@ -53,9 +53,11 @@ public abstract class Layer implements NetElement
     }
 
     /**
-     * Width of elliptical or rectangular region on this layer
-     * into which the previous layer's neurons will connect.
-     * @return
+     * Each neuron in this layer will be connected to one or more neurons
+     * in the <i>previous</i> layer which lie in an ellipse or rectangle
+     * centered on a neuron in the previous layer whose x,y location
+     * matches the neuron in this layer, with a width of twice
+     * <code>getRadiusX</code>
      */
     public int getRadiusX()
     {
@@ -63,9 +65,11 @@ public abstract class Layer implements NetElement
     }
 
     /**
-     * Height of elliptical or rectangular region on this layer
-     * into which the previous layer's neurons will connect.
-     * @return
+     * Each neuron in this layer will be connected to one or more neurons
+     * in the <i>previous</i> layer which lie in an ellipse or rectangle
+     * centered on a neuron in the previous layer whose x,y location
+     * matches the neuron in this layer, with a height of twice
+     * <code>getRadiusY</code>
      */
     public int getRadiusY()
     {

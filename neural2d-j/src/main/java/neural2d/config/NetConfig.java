@@ -12,7 +12,7 @@ import org.w3c.dom.Node;
  * <p>
  *
  * <p>
- ** Copyright Michael C. Whidden 2015
+ * Copyright (c) 2015 Michael C. Whidden
  * @author Michael C. Whidden
  */
 public class NetConfig extends XMLConfig
@@ -53,7 +53,7 @@ public class NetConfig extends XMLConfig
                 + "<!ATTLIST connectionWeight toColumn CDATA #REQUIRED>"
                 + "<!ATTLIST connectionWeight toLayer CDATA #REQUIRED>";
     private final static String trainingDTD =
-            "<!ELEMENT trainingParams ((eta|alpha|lamba|dynamicEta|errorThreshold|repeatSamples|shuffleSamples|averageErrorSmoothing)*)>\n"
+            "<!ELEMENT trainingParams ((eta|alpha|lamba|dynamicEta|errorThreshold|repeatSamples|shuffleSamples|reportEveryNth|averageErrorSmoothing)*)>\n"
                 + "<!ELEMENT eta (#PCDATA)>\n"
                 + "<!ELEMENT alpha (#PCDATA)>\n"
                 + "<!ELEMENT lamba (#PCDATA)>\n"
@@ -61,6 +61,7 @@ public class NetConfig extends XMLConfig
                 + "<!ELEMENT errorThreshold (#PCDATA)>\n"
                 + "<!ELEMENT repeatSamples (#PCDATA)>\n"
                 + "<!ELEMENT shuffleSamples (#PCDATA)>\n"
+                + "<!ELEMENT reportEveryNth (#PCDATA)>\n"
                 + "<!ELEMENT averageErrorSmoothing (#PCDATA)>\n";
 
     public static NetConfig parseConfig(String configFilename) throws ConfigurationException

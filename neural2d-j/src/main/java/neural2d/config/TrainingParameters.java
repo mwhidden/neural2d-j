@@ -7,7 +7,7 @@ import org.w3c.dom.Node;
  * <p>
  * <p>
  * <p>
- ** Copyright Michael C. Whidden 2015
+ * Copyright (c) 2015 Michael C. Whidden
  * @author Michael C. Whidden
  */
 public class TrainingParameters extends XMLConfig
@@ -45,6 +45,7 @@ public class TrainingParameters extends XMLConfig
     // shuffled after each use:
     private boolean repeatInputSamples;
     private boolean shuffleInputSamples;
+    private int reportEveryNth;
 
     public TrainingParameters() throws ConfigurationException
     {
@@ -57,6 +58,7 @@ public class TrainingParameters extends XMLConfig
         recentAverageSmoothingFactor = 125; // Average net errors over this many input samples
         repeatInputSamples = true;
         shuffleInputSamples = true;
+        reportEveryNth = 100;
     }
 
     public TrainingParameters(Node parent) throws ConfigurationException
@@ -115,6 +117,13 @@ public class TrainingParameters extends XMLConfig
                             throw new ConfigurationException("Training parameter " + name + " should be 'on' or 'off'", e);
                         }
                         break;
+                    case "reportEveryNth":
+                        try {
+                            reportEveryNth = Integer.parseInt(getNodeContent(node));
+                        } catch (NumberFormatException e) {
+                            throw new ConfigurationException("Training parameter " + name + " should be an integer.", e);
+                        }
+                        break;
                     case "averageErrorSmoothing":
                         try {
                             recentAverageSmoothingFactor = Integer.parseInt(getNodeContent(node));
@@ -125,6 +134,11 @@ public class TrainingParameters extends XMLConfig
                 }
             }
         }
+    }
+
+    public int getReportEveryNth()
+    {
+        return reportEveryNth;
     }
 
     public float getErrorThreshold()
