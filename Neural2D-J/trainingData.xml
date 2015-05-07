@@ -1,0 +1,27 @@
+<!-- These are the four possible inputs for the XOR problem set.
+ When training, configure the neural net to repeat the training samples.
+ Also enable shuffling the inputs for optimal learning.-->
+
+<sampleSet>
+  <inputSize>2</inputSize>
+  <targetSize>1</targetSize>
+  <samples>
+    <sample>
+      <input>-1 -1</input>
+      <target>-1</target>
+    </sample>
+    <sample>
+      <input>-1 1</input>
+      <target>1</target>
+    </sample>
+    <sample>
+      <input>1 -1</input>
+      <target>1</target>
+    </sample>
+    <sample>
+      <input>1 1</input>
+      <target>-1</target>
+    </sample>
+  </samples>
+</sampleSet>  
+
