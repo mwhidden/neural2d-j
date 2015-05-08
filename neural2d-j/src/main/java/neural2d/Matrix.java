@@ -13,15 +13,15 @@ import neural2d.config.MatrixConfig;
  */
 public class Matrix
 {
-    private final float[][] data;
+    private final double[][] data;
     private final int numCols;
     private final int numRows;
 
     public Matrix(int rows, int cols)
     {
-        data = new float[rows][cols];
+        data = new double[rows][cols];
         for(int i=0; i < rows; i++){
-            data[i] = new float[cols];
+            data[i] = new double[cols];
         }
         this.numRows = rows;
         this.numCols = cols;
@@ -59,12 +59,12 @@ public class Matrix
 
     }
 
-    public void set(int row, int col, float val)
+    public void set(int row, int col, double val)
     {
         data[row][col] = val;
     }
 
-    public float get(int row, int col)
+    public double get(int row, int col)
     {
         return data[row][col];
     }

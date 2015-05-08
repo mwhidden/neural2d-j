@@ -29,7 +29,7 @@ public class WeightsConfig extends XMLConfig
             new HashMap<>();
 
     public void set(String layer, int row, int col,
-            String toLayer, int toRow, int toCol, float val)
+            String toLayer, int toRow, int toCol, double val)
     {
         LayerWeights lW = layerWeights.get(layer);
         if(lW == null){
@@ -49,14 +49,14 @@ public class WeightsConfig extends XMLConfig
 
     private static class NeuronWeights
     {
-        private final Map<String, ListMatrix<Float>> weights =
+        private final Map<String, ListMatrix<Double>> weights =
                 new HashMap<>();
 
-        public float get(String toLayer,
+        public double get(String toLayer,
                 int toRow,
                 int toCol)
         {
-            ListMatrix<Float> m = weights.get(toLayer);
+            ListMatrix<Double> m = weights.get(toLayer);
             if(m == null){
                 throw new IllegalArgumentException("Weight configuration has no such layer named: "
                         + toLayer);
@@ -68,7 +68,7 @@ public class WeightsConfig extends XMLConfig
                 int toRow,
                 int toCol)
         {
-            ListMatrix<Float> m = weights.get(toLayer);
+            ListMatrix<Double> m = weights.get(toLayer);
             if(m == null){
                 return false;
             }
@@ -83,9 +83,9 @@ public class WeightsConfig extends XMLConfig
         public void set(String toLayer,
                 int toRow,
                 int toCol,
-                float val)
+                double val)
         {
-            ListMatrix<Float> m = weights.get(toLayer);
+            ListMatrix<Double> m = weights.get(toLayer);
             if(m == null){
                 m = new ListMatrix<>();
                 weights.put(toLayer, m);
@@ -116,7 +116,7 @@ public class WeightsConfig extends XMLConfig
         }
     }
 
-    public float getWeight(String layer, int row, int col,
+    public double getWeight(String layer, int row, int col,
             String toLayer, int toRow, int toCol)
     {
         return layerWeights.get(layer).get(row, col).get(toLayer, toRow, toCol);
@@ -185,9 +185,9 @@ public class WeightsConfig extends XMLConfig
                     int col = Integer.parseInt(getAttribute(node, "toColumn"));
                     int row = Integer.parseInt(getAttribute(node, "toRow"));
                     String layer = getAttribute(node, "toLayer");
-                    float val;
+                    double val;
                     try {
-                        val = Float.parseFloat(getNodeContent(node));
+                        val = Double.parseDouble(getNodeContent(node));
                     } catch (NumberFormatException e){
                         throw new ConfigurationException("Content of connectionWeight element must be numeric.");
                     }

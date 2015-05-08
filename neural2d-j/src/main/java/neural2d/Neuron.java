@@ -21,14 +21,14 @@ public interface Neuron extends NetElement
     // value minus the computed output value, times the derivative of
     // the output-layer activation function evaluated at the computed output value.
     //
-    void calcOutputGradients(float targetVal);
+    void calcOutputGradients(double targetVal);
 
     // Propagate the net inputs to the outputs
     // To feed forward an individual neuron, we'll sum the weighted inputs, then pass that
     // sum through the transfer function.
     void feedForward();
 
-    float getGradient();
+    double getGradient();
 
     int getColumn();
 
@@ -42,7 +42,7 @@ public interface Neuron extends NetElement
 
     int getNumForwardConnections();
 
-    float getOutput();
+    double getOutput();
 
     int getRow();
 
@@ -50,12 +50,12 @@ public interface Neuron extends NetElement
 
     boolean hasForwardConnections();
 
-    void setGradient(float f);
+    void setGradient(double f);
 
-    void setOutput(float f);
+    void setOutput(double f);
 
     // For backprop training
-    void updateInputWeights(float eta, float alpha);
+    void updateInputWeights(double eta, double alpha);
 
     void addBackConnection(Connection c);
 
@@ -63,16 +63,16 @@ public interface Neuron extends NetElement
 
     void setBiasConnection(Connection c);
 
-    public static class AccumulateSquareWeightsCommand implements Command<Neuron,Float>
+    public static class AccumulateSquareWeightsCommand implements Command<Neuron,Double>
     {
         private static class SquareWeightsVisitor extends NetElementVisitor
         {
-            float sqWeights = 0.0f;
+            double sqWeights = 0.0;
 
             @Override
             public boolean visit(Connection conn)
             {
-                float w = conn.getWeight();
+                double w = conn.getWeight();
                 sqWeights += (w*w);
                 return false;
             }
@@ -81,11 +81,11 @@ public interface Neuron extends NetElement
         }
 
         @Override
-        public Command.FloatResult execute(Neuron n)
+        public Command.DoubleResult execute(Neuron n)
         {
             SquareWeightsVisitor v = new SquareWeightsVisitor();
             n.accept(v);
-            return new Command.FloatResult(v.sqWeights);
+            return new Command.DoubleResult(v.sqWeights);
         }
 
         @Override
@@ -95,13 +95,13 @@ public interface Neuron extends NetElement
         }
     }
 
-    public static class FeedForwardCommand implements Command<Neuron,Float>
+    public static class FeedForwardCommand implements Command<Neuron,Double>
     {
         @Override
-        public Command.FloatResult execute(Neuron n)
+        public Command.DoubleResult execute(Neuron n)
         {
             n.feedForward();
-            return new Command.FloatResult(0.0f);
+            return new Command.DoubleResult(0.0);
         }
 
         @Override
@@ -111,22 +111,22 @@ public interface Neuron extends NetElement
         }
     }
 
-    public static class InputWeightsCommand implements Command<Neuron,Float>
+    public static class InputWeightsCommand implements Command<Neuron,Double>
     {
-        private final float eta;
-        private final float alpha;
+        private final double eta;
+        private final double alpha;
 
-        public InputWeightsCommand(float eta, float alpha)
+        public InputWeightsCommand(double eta, double alpha)
         {
             this.eta = eta;
             this.alpha = alpha;
         }
 
         @Override
-        public Command.FloatResult execute(Neuron n)
+        public Command.DoubleResult execute(Neuron n)
         {
             n.updateInputWeights(eta, alpha);
-            return new Command.FloatResult(0.0f);
+            return new Command.DoubleResult(0.0);
         }
 
         @Override
@@ -136,7 +136,7 @@ public interface Neuron extends NetElement
         }
     }
 
-    public static class AccumulateSquareErrorCommand implements Command<Neuron,Float>
+    public static class AccumulateSquareErrorCommand implements Command<Neuron,Double>
     {
         private final Sample sample;
 
@@ -146,10 +146,10 @@ public interface Neuron extends NetElement
         }
 
         @Override
-        public Command.FloatResult execute(Neuron n)
+        public Command.DoubleResult execute(Neuron n)
         {
-            float delta = sample.getTargetVal(n.getRow(),n.getColumn()) - n.getOutput();
-            return new Command.FloatResult(delta * delta);
+            double delta = sample.getTargetVal(n.getRow(),n.getColumn()) - n.getOutput();
+            return new Command.DoubleResult(delta * delta);
         }
 
         @Override
@@ -161,7 +161,7 @@ public interface Neuron extends NetElement
 
     public static class MaxRowCol
     {
-        float max;
+        double max;
         int row, col;
     }
 
@@ -223,7 +223,7 @@ public interface Neuron extends NetElement
         }
     }
 
-    public static class AssignInputsCommand implements Command<Neuron,Float>
+    public static class AssignInputsCommand implements Command<Neuron,Double>
     {
         private final Matrix inputs;
         public AssignInputsCommand(Matrix inputs)
@@ -232,10 +232,10 @@ public interface Neuron extends NetElement
         }
 
         @Override
-        public Command.FloatResult execute(Neuron n)
+        public Command.DoubleResult execute(Neuron n)
         {
             n.setOutput(inputs.get(n.getRow(), n.getColumn()));
-            return new Command.FloatResult(0.0f);
+            return new Command.DoubleResult(0.0);
         }
 
         @Override
@@ -246,7 +246,7 @@ public interface Neuron extends NetElement
 
     }
 
-    public static class CalculateGradientsCommand implements Command<Neuron,Float>
+    public static class CalculateGradientsCommand implements Command<Neuron,Double>
     {
         private final Matrix targets;
         public CalculateGradientsCommand(Matrix targets)
@@ -255,10 +255,10 @@ public interface Neuron extends NetElement
         }
 
         @Override
-        public Command.FloatResult execute(Neuron n)
+        public Command.DoubleResult execute(Neuron n)
         {
             n.calcOutputGradients(targets.get(n.getRow(), n.getColumn()));
-            return new Command.FloatResult(0.0f);
+            return new Command.DoubleResult(0.0);
         }
 
         @Override

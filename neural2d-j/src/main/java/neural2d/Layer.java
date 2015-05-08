@@ -217,18 +217,18 @@ public abstract class Layer implements NetElement
         return pool.invoke(lAction).getResult();
     }
 
-    static class AccumulateForwardWeights implements Command<Layer,Float>
+    static class AccumulateForwardWeights implements Command<Layer,Double>
     {
         @Override
-        public FloatResult execute(Layer l)
+        public DoubleResult execute(Layer l)
         {
             // Skip the bias layer
             if(l.getLayerType() != LayerType.BIAS){
                 Neuron.AccumulateSquareWeightsCommand cmd =
                         new Neuron.AccumulateSquareWeightsCommand();
-                return new FloatResult(l.executeCommand(cmd));
+                return new DoubleResult(l.executeCommand(cmd));
             } else {
-                return new FloatResult(0.0f);
+                return new DoubleResult(0.0);
             }
         }
 

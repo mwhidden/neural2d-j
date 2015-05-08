@@ -68,33 +68,33 @@ public class Sample
             return cols;
         }
 
-        public float getRed(int row, int col)
+        public double getRed(int row, int col)
         {
             return data[row][col][2];
         }
 
-        public float getGreen(int row, int col)
+        public double getGreen(int row, int col)
         {
             return data[row][col][1];
         }
 
-        public float getBlue(int row, int col)
+        public double getBlue(int row, int col)
         {
             return data[row][col][0];
         }
 
-        public float getBW(int row, int col)
+        public double getBW(int row, int col)
         {
             // Todo: Document the magic 0.3, 0.6, 0.1 numbers.
-             return 0.3f * getRed(row, col) +   // Red
-                           0.6f * getGreen(row,col) +   // Green
-                           0.1f * getBlue(row,col);    // Blue
+             return 0.3 * getRed(row, col) +   // Red
+                           0.6 * getGreen(row,col) +   // Green
+                           0.1 * getBlue(row,col);    // Blue
         }
 
     }
 
     /**
-     * Get the pixel data, converted to Floats and flattened to a 1D list.
+     * Get the pixel data, converted to Doubles and flattened to a 1D list.
      *
      * @return the value of data
      */
@@ -109,9 +109,9 @@ public class Sample
                     imageData.getNumColumns());
 
         // BMP pixels are arranged in memory in the order (B, G, R). We'll convert
-        // the pixel to a float using one of the conversions below:
+        // the pixel to a double using one of the conversions below:
 
-        float val = 0.0f;
+        double val = 0.0;
 
         for(int row = 0; row < imageData.getNumRows(); row++){
             for (int col = 0; col < imageData.getNumColumns(); ++col) {
@@ -126,7 +126,7 @@ public class Sample
                 }
 
                 // Convert it to the range 0.0..1.0: this value will be the input to an input neuron:
-                data.set(row, col, val / 256.0f);
+                data.set(row, col, val / 256.0);
             }
         }
     }
@@ -154,7 +154,7 @@ public class Sample
         return targetVals;
     }
 
-    public float getTargetVal(int row, int col)
+    public double getTargetVal(int row, int col)
     {
         return targetVals.get(row, col);
     }

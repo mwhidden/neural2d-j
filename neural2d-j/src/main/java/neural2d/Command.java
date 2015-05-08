@@ -18,22 +18,22 @@ public interface Command<T,V> {
         public T getResult();
     }
 
-    public static class FloatResult implements JoinableResult<Float>
+    public static class DoubleResult implements JoinableResult<Double>
     {
-        private float value;
+        private double value;
 
-        public FloatResult(float f)
+        public DoubleResult(double f)
         {
             this.value = f;
         }
 
         @Override
-        public void join(Float f){
+        public void join(Double f){
             value += f;
         }
 
         @Override
-        public Float getResult()
+        public Double getResult()
         {
             return value;
         }

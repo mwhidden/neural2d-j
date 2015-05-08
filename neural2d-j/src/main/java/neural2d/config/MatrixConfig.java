@@ -8,12 +8,12 @@ package neural2d.config;
  * @author Michael C. Whidden
  */
 public class MatrixConfig {
-    private float[][] data;
+    private double[][] data;
 
     public static MatrixConfig parse(String data, int rows, int cols) throws ConfigurationException
     {
         MatrixConfig cfg = new MatrixConfig();
-        cfg.data = new float[rows][cols];
+        cfg.data = new double[rows][cols];
 
         String[] elements = data.split("\\s");
         if(elements.length != rows * cols){
@@ -25,14 +25,14 @@ public class MatrixConfig {
         int idx = 0;
         for(int i=0; i < rows; i++){
             for(int j=0; j < cols; j++){
-                cfg.data[i][j] = Float.parseFloat(elements[idx++]);
+                cfg.data[i][j] = Double.parseDouble(elements[idx++]);
             }
         }
 
         return cfg;
     }
 
-    public float get(int row, int col)
+    public double get(int row, int col)
     {
         return data[row][col];
     }

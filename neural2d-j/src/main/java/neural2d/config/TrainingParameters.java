@@ -15,21 +15,21 @@ public class TrainingParameters extends XMLConfig
 
     // Training will pause when the recent average overall error falls below this threshold:
 
-    private float errorThreshold;
+    private double errorThreshold;
         // eta is the network learning rate. It can be set to a constant value, somewhere
     // in the range 0.0001 to 0.1. Optionally, set dynamicEtaAdjust to true to allow
     // the program to automatically adjust eta during learning for optimal learning.
-    private float eta;                // Initial overall net learning rate, [0.0..1.0]
+    private double eta;                // Initial overall net learning rate, [0.0..1.0]
     private boolean dynamicEta;    // true enables automatic eta adjustment during training
     // alpha is the momentum factor. Set it to zero to disable momentum. If alpha > 0, then
     // changes in any connection weight in the same direction that the weight was changed
     // last time is amplified. This helps converge on a solution a little faster during
     // the early stages of training, but if set too high will interfere with the network
     // converging on the most accurate solution.
-    private float alpha; // Initial momentum, multiplier of last deltaWeight, [0.0..1.0]
+    private double alpha; // Initial momentum, multiplier of last deltaWeight, [0.0..1.0]
 
     // Regularization parameter. If zero, regularization is disabled:
-    private float lambda;
+    private double lambda;
         // When a net topology specifies sparse connections (i.e., when there is a radius
     // parameter specified in the topology config file), then the shape of the area
     // that is back-projected onto the source layer of neurons can be elliptical or
@@ -49,11 +49,11 @@ public class TrainingParameters extends XMLConfig
 
     public TrainingParameters() throws ConfigurationException
     {
-        errorThreshold = 0.01f;
-        eta = 0.01f;                    // Initial overall net learning rate, [0.0..1.0]
+        errorThreshold = 0.01;
+        eta = 0.01;                    // Initial overall net learning rate, [0.0..1.0]
         dynamicEta = true;       // true enables automatic eta adjustment during training
-        alpha = 0.0f;                   // Momentum factor, multiplier of last deltaWeight, [0.0..1.0]
-        lambda = 0.0f;                  // Regularization parameter; disabled if 0.0
+        alpha = 0.0;                   // Momentum factor, multiplier of last deltaWeight, [0.0..1.0]
+        lambda = 0.0;                  // Regularization parameter; disabled if 0.0
         projectRectangular = false;    // Use elliptical areas for sparse connections
         recentAverageSmoothingFactor = 125; // Average net errors over this many input samples
         repeatInputSamples = true;
@@ -70,21 +70,21 @@ public class TrainingParameters extends XMLConfig
                 switch (name) {
                     case "eta":
                         try {
-                            eta = Float.parseFloat(getNodeContent(node));
+                            eta = Double.parseDouble(getNodeContent(node));
                         } catch (NumberFormatException e) {
                             throw new ConfigurationException("Training parameter " + name + " should be numeric", e);
                         }
                         break;
                     case "alpha":
                         try {
-                            alpha = Float.parseFloat(getNodeContent(node));
+                            alpha = Double.parseDouble(getNodeContent(node));
                         } catch (NumberFormatException e) {
                             throw new ConfigurationException("Training parameter " + name + " should be numeric", e);
                         }
                         break;
                     case "lamba":
                         try {
-                            lambda = Float.parseFloat(getNodeContent(node));
+                            lambda = Double.parseDouble(getNodeContent(node));
                         } catch (NumberFormatException e) {
                             throw new ConfigurationException("Training parameter " + name + " should be numeric", e);
                         }
@@ -98,7 +98,7 @@ public class TrainingParameters extends XMLConfig
                         break;
                     case "errorThreshold":
                         try {
-                            errorThreshold = Float.parseFloat(getNodeContent(node));
+                            errorThreshold = Double.parseDouble(getNodeContent(node));
                         } catch (NumberFormatException e) {
                             throw new ConfigurationException("Training parameter " + name + " should be numeric", e);
                         }
@@ -141,12 +141,12 @@ public class TrainingParameters extends XMLConfig
         return reportEveryNth;
     }
 
-    public float getErrorThreshold()
+    public double getErrorThreshold()
     {
         return errorThreshold;
     }
 
-    public float getEta()
+    public double getEta()
     {
         return eta;
     }
@@ -156,12 +156,12 @@ public class TrainingParameters extends XMLConfig
         return dynamicEta;
     }
 
-    public float getAlpha()
+    public double getAlpha()
     {
         return alpha;
     }
 
-    public float getLambda()
+    public double getLambda()
     {
         return lambda;
     }

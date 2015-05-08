@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NeuronImpl implements Neuron
 {
-    protected float output, gradient;
+    protected double output, gradient;
     // All the input and output connections for this neuron.
     List<Connection> connections;   // the container of Connection records
     Set<Neuron> sourceNeurons;
@@ -31,8 +31,8 @@ public class NeuronImpl implements Neuron
             int row,
             int col)
     {
-        this.output = 1.0f;
-        this.gradient = 0.0f;
+        this.output = 1.0;
+        this.gradient = 0.0;
         this.connections = new ArrayList<>();
         this.transferFunction = tf;
         this.sourceNeurons = new HashSet<>();
@@ -45,7 +45,7 @@ public class NeuronImpl implements Neuron
     }
 
     @Override
-    public float getGradient()
+    public double getGradient()
     {
         return gradient;
     }
@@ -68,7 +68,7 @@ public class NeuronImpl implements Neuron
     //
     @Override
     public void calcHiddenGradients(){
-        float dow = sumDOW_nextLayer();
+        double dow = sumDOW_nextLayer();
         gradient = dow * transferFunction.derivative().transfer(output);
     }
 
@@ -78,8 +78,8 @@ public class NeuronImpl implements Neuron
     // the output-layer activation function evaluated at the computed output value.
     //
     @Override
-    public void calcOutputGradients(float targetVal){
-        float delta = targetVal - output;
+    public void calcOutputGradients(double targetVal){
+        double delta = targetVal - output;
         gradient = delta * transferFunction.derivative().transfer(output);
     }
 
@@ -119,7 +119,7 @@ public class NeuronImpl implements Neuron
 
     private static class SumDOWVisitor extends NetElementVisitor
     {
-        float sum =0.0f;
+        double sum =0.0;
 
         @Override
         public boolean visit(Connection conn)
@@ -130,7 +130,7 @@ public class NeuronImpl implements Neuron
     }
 
     // Used in hidden layer backprop training
-    protected float sumDOW_nextLayer()
+    protected double sumDOW_nextLayer()
     {
         SumDOWVisitor v = new SumDOWVisitor();
         accept(v);
@@ -196,7 +196,7 @@ public class NeuronImpl implements Neuron
 
     private static class FeedForwardVisitor extends NetElementVisitor
     {
-        float sum =0.0f;
+        double sum =0.0;
 
         @Override
         public boolean visit(Connection conn)
@@ -220,9 +220,9 @@ public class NeuronImpl implements Neuron
 
     private static class UpdateWeightsVisitor extends NetElementVisitor
     {
-        float eta, alpha, gradient;
+        double eta, alpha, gradient;
 
-        public UpdateWeightsVisitor(float eta, float alpha, float gradient)
+        public UpdateWeightsVisitor(double eta, double alpha, double gradient)
         {
             this.eta = eta;
             this.alpha = alpha;
@@ -234,9 +234,9 @@ public class NeuronImpl implements Neuron
         public boolean visit(Connection conn)
         {
             Neuron fromNeuron = conn.getFromNeuron();
-            float oldDeltaWeight = conn.getDeltaWeight();
+            double oldDeltaWeight = conn.getDeltaWeight();
 
-            float newDeltaWeight =
+            double newDeltaWeight =
                     // Individual input, magnified by the gradient and train rate:
                     eta
                     * fromNeuron.getOutput()
@@ -254,7 +254,7 @@ public class NeuronImpl implements Neuron
 
     // For backprop training
     @Override
-    public void updateInputWeights(float eta, float alpha){
+    public void updateInputWeights(double eta, double alpha){
         // The weights to be updated are the weights from the neurons in the
         // preceding layer (the source layer) to this neuron:
         UpdateWeightsVisitor v = new UpdateWeightsVisitor(eta, alpha, gradient);
@@ -262,19 +262,19 @@ public class NeuronImpl implements Neuron
     }
 
     @Override
-    public float getOutput()
+    public double getOutput()
     {
         return output;
     }
 
     @Override
-    public void setOutput(float f)
+    public void setOutput(double f)
     {
         this.output = f;
     }
 
     @Override
-    public void setGradient(float f)
+    public void setGradient(double f)
     {
         this.gradient = f;
     }

@@ -12,8 +12,8 @@ public class BiasNeuron extends NeuronImpl
     public BiasNeuron(Layer layer)
     {
         super(TransferFunction.IDENTITY, layer, 0, 0);
-        this.gradient = 0.0f;
-        this.output = 1.0f;
+        this.gradient = 0.0;
+        this.output = 1.0;
     }
 
     @Override

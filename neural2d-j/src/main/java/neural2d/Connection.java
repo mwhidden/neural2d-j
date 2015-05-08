@@ -9,14 +9,14 @@ public class Connection implements NetElement
 {
     private final Neuron fromNeuron;
     private final Neuron toNeuron;
-    private float weight;
-    private float deltaWeight; // the weight change from the previous training iteration
+    private double weight;
+    private double deltaWeight; // the weight change from the previous training iteration
 
     public Connection(Neuron from, Neuron to)
     {
         this.fromNeuron = from;
         this.toNeuron = to;
-        this.deltaWeight = 0.0f;
+        this.deltaWeight = 0.0;
     }
 
     @Override
@@ -25,22 +25,22 @@ public class Connection implements NetElement
         return "Connection(" + fromNeuron + "--(" + weight + "/" + deltaWeight + ")-->" + toNeuron + ")";
     }
 
-    public float getWeight()
+    public double getWeight()
     {
         return weight;
     }
 
-    public void setWeight(float weight)
+    public void setWeight(double weight)
     {
         this.weight = weight;
     }
 
-    public float getDeltaWeight()
+    public double getDeltaWeight()
     {
         return deltaWeight;
     }
 
-    public void setDeltaWeight(float deltaWeight)
+    public void setDeltaWeight(double deltaWeight)
     {
         this.deltaWeight = deltaWeight;
     }

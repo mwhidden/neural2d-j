@@ -6,15 +6,15 @@ package neural2d;
  * @author Michael C. Whidden
  */
 public interface TransferFunction {
-    public float transfer(float val);
+    public double transfer(double val);
     public TransferFunction derivative();
 
     public static final TransferFunction LOGISTIC = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
-                    return 1.0f/(1.0f+(float)Math.exp(-val));
+                    return 1.0/(1.0+Math.exp(-val));
                 }
 
                 @Override
@@ -27,9 +27,9 @@ public interface TransferFunction {
     public static final TransferFunction LOGISTIC_D = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
-                    return (float)Math.exp(-val)/(float)Math.pow((Math.exp(-val) + 1.0), 1.0);
+                    return Math.exp(-val)/Math.pow((Math.exp(-val) + 1.0), 2.0);
                 }
 
                 @Override
@@ -43,7 +43,7 @@ public interface TransferFunction {
     public static final TransferFunction IDENTITY = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
                     return val;
                 }
@@ -58,9 +58,9 @@ public interface TransferFunction {
     public static final TransferFunction IDENTITY_D = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
-                    return 1.0f;
+                    return 1.0;
                 }
 
                 @Override
@@ -74,10 +74,10 @@ public interface TransferFunction {
     public static final TransferFunction RAMP = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
-                    if(val < -1.0) return -1.0f;
-                    if(val > 1.0) return 1.0f;
+                    if(val < -1.0) return -1.0;
+                    if(val > 1.0) return 1.0;
                     return val;
                 }
 
@@ -92,12 +92,12 @@ public interface TransferFunction {
     public static final TransferFunction RAMP_D = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
                     if(val < -1.0 || val > 1.0){
-                        return 0.0f;
+                        return 0.0;
                     } else {
-                        return 1.0f;
+                        return 1.0;
                     }
                 }
 
@@ -112,9 +112,9 @@ public interface TransferFunction {
     public static final TransferFunction GAUSSIAN = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
-                    return (float)Math.exp(-((val * val)/2.0));
+                    return Math.exp(-((val * val)/2.0));
                 }
 
                 @Override
@@ -127,9 +127,9 @@ public interface TransferFunction {
     public static final TransferFunction GAUSSIAN_D = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
-                    return -val * (float)Math.exp(-(val*val)/2.0);
+                    return -val * Math.exp(-(val*val)/2.0);
                 }
 
                 @Override
@@ -143,9 +143,9 @@ public interface TransferFunction {
     public static final TransferFunction TANH = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
-                    return (float)Math.tanh(val);
+                    return Math.tanh(val);
                 }
 
                 @Override
@@ -158,10 +158,10 @@ public interface TransferFunction {
     public static final TransferFunction TANH_D = new TransferFunction()
             {
                 @Override
-                public float transfer(float val)
+                public double transfer(double val)
                 {
                     double t = Math.tanh(val);
-                    return 1.0f - (float)(val*val);
+                    return 1.0 - (t*t);
                 }
 
                 @Override

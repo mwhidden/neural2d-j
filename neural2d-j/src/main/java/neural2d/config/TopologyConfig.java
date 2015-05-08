@@ -277,5 +277,4 @@ public class TopologyConfig extends XMLConfig
         matrix.load(MatrixConfig.parse(data, rows, cols));
         return matrix;
     }
-
 }

@@ -31,9 +31,9 @@ public class Net implements NetElement
     int reportEveryNth;
 
     int inputSampleNumber; // Increments each time feedForward() is called
-    float error;                // Overall net error
-    float recentAverageError;   // Averaged over recentAverageSmoothingFactor samples
-    float eta;
+    double error;                // Overall net error
+    double recentAverageError;   // Averaged over recentAverageSmoothingFactor samples
+    double eta;
     TrainingParameters trainingParams;
     SampleSet sampleSet;
 
@@ -41,7 +41,7 @@ public class Net implements NetElement
     private List<Layer> layers;
     private Layer biasLayer; // fake layer holding the bias neuron
 
-    private float lastRecentAverageError;    // Used for dynamically adjusting eta
+    private double lastRecentAverageError;    // Used for dynamically adjusting eta
     private int totalNumberConnections; // Including 1 bias connection per neuron
     private int totalNumberNeurons;
     private final Random rand = new Random();
@@ -52,11 +52,11 @@ public class Net implements NetElement
     {
         reportEveryNth = 1;
         inputSampleNumber = 0;         // Increments each time feedForward() is called
-        error = 1.0f;
-        recentAverageError = 1.0f;
+        error = 1.0;
+        recentAverageError = 1.0;
         //connections = new ArrayList<>();
         layers = new ArrayList<>();
-        lastRecentAverageError = 1.0f;
+        lastRecentAverageError = 1.0;
         totalNumberConnections = 0;
         totalNumberNeurons = 0;
         sampleSet = new SampleSet();
@@ -159,7 +159,7 @@ public class Net implements NetElement
 
         System.out.println("Found " + neuronsWithNoSink + " neurons with no sink.");
         System.out.println(numNeurons + " neurons total; " + totalNumberConnections + " back+bias connections.");
-        System.out.println("About " + (int)((float)totalNumberConnections / numNeurons + 0.5)
+        System.out.println("About " + (int)(totalNumberConnections / numNeurons + 0.5)
              + " connections per neuron on average.");
         if(config.isTrained()){
             System.out.println("Network is trained. Loading weights.");
@@ -203,7 +203,7 @@ public class Net implements NetElement
     // a positive value if x,y is outside the ellipse; 0.0 if on the ellipse;
     // negative if inside the ellipse.
     //
-    private float elliptDist(float x, float y, float radiusX, float radiusY)
+    private double elliptDist(double x, double y, double radiusX, double radiusY)
     {
         assert(radiusX >= 0.0 && radiusY >= 0.0);
         return radiusY*radiusY*x*x + radiusX*radiusX*y*y - radiusX*radiusX*radiusY*radiusY;
@@ -245,8 +245,8 @@ public class Net implements NetElement
         assert(sizeX > 0 && sizeY > 0);
 
         // Calculate the normalized [0..1] coordinates of our neuron:
-        float normalizedX = ((float)nx / sizeX) + (1.0f / (2 * sizeX));
-        float normalizedY = ((float)ny / sizeY) + (1.0f / (2 * sizeY));
+        double normalizedX = (nx / sizeX) + (1.0 / (2 * sizeX));
+        double normalizedY = (ny / sizeY) + (1.0 / (2 * sizeY));
 
         // Calculate the coords of the nearest neuron in the "from" layer.
         // The calculated coords are relative to the "from" layer:
@@ -296,8 +296,8 @@ public class Net implements NetElement
         // more than once in the topology config file with the same "from" layer if the projected
         // rectangular or elliptical areas on the source layer overlap.
 
-        float xcenter = ((float)xmin + (float)xmax) / 2.0f;
-        float ycenter = ((float)ymin + (float)ymax) / 2.0f;
+        double xcenter = (xmin + xmax) / 2.0;
+        double ycenter = (ymin + ymax) / 2.0;
         int maxNumSourceNeurons = ((xmax - xmin) + 1) * ((ymax - ymin) + 1);
 
         if(!sourceNeurons.containsKey(neuron)){
@@ -331,8 +331,8 @@ public class Net implements NetElement
                     if (layerTo.isConvolutionLayer()) {
                         conn.setWeight(layerTo.getConvolveMatrix().get(x - xmin, y - ymin));
                     } else {
-                        //connections.back().weight = (randomFloat() - 0.5) / maxNumSourceNeurons;
-                        conn.setWeight(((randomFloat() * 2.0f) - 1.0f) / (float)Math.sqrt(maxNumSourceNeurons));
+                        //connections.back().weight = (randomDouble() - 0.5) / maxNumSourceNeurons;
+                        conn.setWeight(((randomDouble() * 2.0) - 1.0) / Math.sqrt(maxNumSourceNeurons));
                     }
 
                     // Remember the source neuron for detecting duplicate connections:
@@ -342,11 +342,11 @@ public class Net implements NetElement
         }
     }
 
-    // Returns a random float in the range [0.0..1.0]
+    // Returns a random double in the range [0.0..1.0]
     //
-    private float randomFloat()
+    private double randomDouble()
     {
-        return (float)((double)rand.nextInt(1073741824)/1073741823.0);
+        return (rand.nextInt(1073741824)/1073741823.0);
     }
 
     // Add a weighted bias input, modeled as a back-connection to a fake neuron:
@@ -358,8 +358,8 @@ public class Net implements NetElement
         // connections.add(c);
         // int connectionIdx = connections.size() - 1;
 
-        c.setWeight(randomFloat() - 0.5f); // Review this !!!
-        c.setDeltaWeight(0.0f);
+        c.setWeight(randomDouble() - 0.5); // Review this !!!
+        c.setDeltaWeight(0.0);
 
         // Record the back connection with the destination neuron:
         neuron.setBiasConnection(c);
@@ -372,12 +372,12 @@ public class Net implements NetElement
 
     // Calculate a new eta parameter based on the current and last average net error.
     //
-    private float adjustedEta()
+    private double adjustedEta()
     {
-        float thresholdUp = 0.001f;       // Ignore error increases less than this magnitude
-        float thresholdDown = 0.01f;      // Ignore error decreases less than this magnitude
-        float factorUp = 1.005f;          // Factor to incrementally increase eta
-        float factorDown = 0.999f;        // Factor to incrementally decrease eta
+        double thresholdUp = 0.001;       // Ignore error increases less than this magnitude
+        double thresholdDown = 0.01;      // Ignore error decreases less than this magnitude
+        double factorUp = 1.005;          // Factor to incrementally increase eta
+        double factorDown = 0.999;        // Factor to incrementally decrease eta
 
         if (!trainingParams.isDynamicEta()) {
             return eta;
@@ -385,7 +385,7 @@ public class Net implements NetElement
 
         assert(thresholdUp > 0.0 && thresholdDown > 0.0 && factorUp >= 1.0 && factorDown >= 0.0 && factorDown <= 1.0);
 
-        float errorGradient = (recentAverageError - lastRecentAverageError) / recentAverageError;
+        double errorGradient = (recentAverageError - lastRecentAverageError) / recentAverageError;
         if (errorGradient > thresholdUp) {
             eta = factorDown * eta;
         } else if (errorGradient < -thresholdDown) {
@@ -414,7 +414,7 @@ public class Net implements NetElement
         // the number of input neurons:
 
         Layer inputLayer = layers.get(1);
-        Command<Neuron,Float> command = new Neuron.AssignInputsCommand(sample.getData(inputLayer.getChannel()));
+        Command<Neuron,Double> command = new Neuron.AssignInputsCommand(sample.getData(inputLayer.getChannel()));
         inputLayer.executeCommand(command);
 
         // Start the forward propagation at the first hidden layer:
@@ -473,13 +473,13 @@ public class Net implements NetElement
     }
 
     // for forward propagation
-    float getNetError()
+    double getNetError()
     {
         return error;
     }
 
     // for forward propagation
-    float getRecentAverageError()
+    double getRecentAverageError()
     {
         return recentAverageError;
     }
@@ -492,9 +492,9 @@ public class Net implements NetElement
     //
     void calculateOverallNetError(Sample sample) throws SampleException
     {
-        float lambda = trainingParams.getLambda();
+        double lambda = trainingParams.getLambda();
         int smoothingFactor = trainingParams.getRecentAverageSmoothingFactor();
-        error = 0.0f;
+        error = 0.0;
 
         // Return if there are no known target values:
 
@@ -513,7 +513,7 @@ public class Net implements NetElement
 
         if (lambda != 0.0) {
             Layer.AccumulateForwardWeights weightAction = new Layer.AccumulateForwardWeights();
-            float sqWeight = executeCommand(weightAction);
+            double sqWeight = executeCommand(weightAction);
             //for (int i = 0; i < connections.size(); ++i) {
             //    sumWeightsSquared_ += connections.get(i).getWeight();
             //}
@@ -525,13 +525,13 @@ public class Net implements NetElement
         lastRecentAverageError = recentAverageError;
         recentAverageError =
                 (recentAverageError * smoothingFactor + error)
-                / (smoothingFactor + 1.0f);
+                / (smoothingFactor + 1.0);
     }
 
-    private float getRMS(Layer layer, Sample sample)
+    private double getRMS(Layer layer, Sample sample)
     {
         Neuron.AccumulateSquareErrorCommand action = new Neuron.AccumulateSquareErrorCommand(sample);
-        return layer.executeCommand(action)/(2.0f*layer.size());
+        return layer.executeCommand(action)/(2.0*layer.size());
     }
 
     public void train() throws SampleException
@@ -580,8 +580,8 @@ public class Net implements NetElement
             if(validate){
                 Matrix targets = sample.getTargetVals();
                 for (Neuron n : lastLayer.getNeurons()) { // For all neurons in output layer
-                    float target = targets.get(n.getRow(), n.getColumn());
-                    float rms = getRMS(lastLayer, sample);
+                    double target = targets.get(n.getRow(), n.getColumn());
+                    double rms = getRMS(lastLayer, sample);
                     if(rms > trainingParams.getErrorThreshold()){
                         System.out.println("Validation failed for neuron at row "
                                 + n.getRow() + " column " + n.getColumn() + " in output layer. "
@@ -630,7 +630,7 @@ public class Net implements NetElement
             // and low to indicate no match.
 
             if (lastLayer.isClassifier()) {
-                //float maxOutput = (numeric_limits<float>::min)();
+                //double maxOutput = (numeric_limits<double>::min)();
                 int maxCol, maxRow;
 
                 Neuron.MaxNeuronCommand action = new Neuron.MaxNeuronCommand();
