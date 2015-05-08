@@ -163,6 +163,45 @@ public abstract class Layer implements NetElement
         return numNeurons;
     }
 
+    private static class ConnectionCountVisitor extends NetElementVisitor
+    {
+        private static final int FORWARD = 0;
+        private static final int BACKWARD = 0;
+        private final int dir;
+        int count = 0;
+        public ConnectionCountVisitor(int dir)
+        {
+            this.dir = dir;
+        }
+
+        @Override
+        public boolean visit(Neuron neuron)
+        {
+            if(dir == FORWARD){
+                count += neuron.getNumForwardConnections();
+            } else {
+                count += neuron.getNumBackConnections();
+            }
+            return false;
+        }
+
+    }
+
+    public int getNumFwdConnections()
+    {
+        ConnectionCountVisitor v = new ConnectionCountVisitor(ConnectionCountVisitor.FORWARD);
+        accept(v);
+        return v.count;
+    }
+
+
+    public int getNumBackConnections()
+    {
+        ConnectionCountVisitor v = new ConnectionCountVisitor(ConnectionCountVisitor.BACKWARD);
+        accept(v);
+        return v.count;
+    }
+
     /**
      * If the NeuronCommand is parallelizable, the NeuronCommands may be
      * executed, once per Neuron, in any order, in parallel. Otherwise,

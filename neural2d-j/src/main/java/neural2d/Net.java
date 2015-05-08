@@ -1,8 +1,12 @@
 package neural2d;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 import neural2d.Command.JoinableResult;
@@ -42,6 +46,7 @@ public class Net implements NetElement
     private int totalNumberNeurons;
     private final Random rand = new Random();
     private final ForkJoinPool pool = new ForkJoinPool();
+    Map<Neuron,Set<Neuron>> sourceNeurons = new HashMap<>();
 
     public Net(NetConfig config) throws ConfigurationException
     {
@@ -151,8 +156,6 @@ public class Net implements NetElement
             }
         }
 
-        // Optionally enable the next line to display the resulting net topology:
-        debugShowNet(true);
 
         System.out.println("Found " + neuronsWithNoSink + " neurons with no sink.");
         System.out.println(numNeurons + " neurons total; " + totalNumberConnections + " back+bias connections.");
@@ -162,6 +165,8 @@ public class Net implements NetElement
             System.out.println("Network is trained. Loading weights.");
             accept(new LoadWeightConfigVisitor(config.getWeightsConfig()));
         }
+        // Optionally enable the next line to display the resulting net topology:
+        debugShowNet(true);
         this.eta = trainingParams.getEta();
     }
 
@@ -295,6 +300,9 @@ public class Net implements NetElement
         float ycenter = ((float)ymin + (float)ymax) / 2.0f;
         int maxNumSourceNeurons = ((xmax - xmin) + 1) * ((ymax - ymin) + 1);
 
+        if(!sourceNeurons.containsKey(neuron)){
+            sourceNeurons.put(neuron, new HashSet<Neuron>());
+        }
         for (int y = ymin; y <= ymax; ++y) {
             for (int x = xmin; x <= xmax; ++x) {
                 if (!layerTo.isConvolutionLayer() && !layerTo.isRectangular() && elliptDist(xcenter - x, ycenter - y,
@@ -308,7 +316,7 @@ public class Net implements NetElement
                 }
                 Neuron fromNeuron = layerFrom.getNeuron(x, y);
 
-                if (neuron.sourceNeurons.contains(fromNeuron)) {
+                if (sourceNeurons.get(neuron).contains(fromNeuron)) {
                     System.out.println("dup");
                     break; // Skip this connection, proceed to the next
                 } else {
@@ -328,7 +336,7 @@ public class Net implements NetElement
                     }
 
                     // Remember the source neuron for detecting duplicate connections:
-                    neuron.sourceNeurons.add(fromNeuron);
+                    sourceNeurons.get(neuron).add(fromNeuron);
                 }
             }
         }
@@ -606,7 +614,7 @@ public class Net implements NetElement
 
         System.out.print( "\nPass #" + inputSampleNumber + "\nOutputs: ");
         for (Neuron n : lastLayer.getNeurons()) { // For all neurons in output layer
-            System.out.print( n.output + " ");
+            System.out.print( n.getOutput() + " ");
         }
         System.out.println();
 
@@ -655,47 +663,69 @@ public class Net implements NetElement
         return layers.get(1).size();
     }
 
+    private static class DebugVisitor extends NetElementVisitor
+    {
+        int neuronFwdConns, neuronBackConns;
+        final boolean details;
+
+        public DebugVisitor(boolean details)
+        {
+            this.details = details;
+        }
+
+        @Override
+        public boolean visit(Net net)
+        {
+            System.out.println( "Net configuration (incl. bias connection): --------------------------");
+            return true;
+        }
+
+        @Override
+        public boolean visit(Neuron n)
+        {
+            if (details) {
+                System.out.println( "  " + n + " output: " + n.getOutput());
+            }
+
+            neuronFwdConns += n.getNumForwardConnections();
+            neuronBackConns += n.getNumBackConnections(); // Includes the bias connection
+
+            return true;
+        }
+
+        @Override
+        public boolean visit(Connection c)
+        {
+            if(details){
+                System.out.println("        " + c);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean visit(Layer l)
+        {
+            neuronFwdConns = 0;
+            neuronBackConns = 0;
+            System.out.println( "Layer '" + l.getName() + "' has " + l.size()
+                 + " neurons arranged in " + l.getNumRows() + "x" + l.getNumColumns() + ":");
+            if (!details) {
+                System.out.println( "   connections: " + l.getNumBackConnections() + " back, "
+                     + l.getNumFwdConnections() + " forward.");
+            }
+            return true;
+        }
+
+    }
+
     // for displaying the results when processing input samples
     // This is an optional way to display lots of information about the network
     // topology. Tweak as needed. The argument 'details' can be used to control
     // if all the connections are displayed in detail.
     void debugShowNet(boolean details)
     {
-        int numFwdConnections;
-        int numBackConnections;
-
-        System.out.println( "\n\nNet configuration (incl. bias connection): --------------------------");
-
-        for (Layer l : layers) {
-            numFwdConnections = 0;
-            numBackConnections = 0;
-            System.out.println( "Layer '" + l.getName() + "' has " + l.size()
-                 + " neurons arranged in " + l.getNumRows() + "x" + l.getNumColumns() + ":");
-
-            for (Neuron  n : l.getNeurons()) {
-                if (details) {
-                    System.out.println( "  neuron(" + n + ")" + " output: " + n.output);
-                }
-
-                numFwdConnections += n.getNumForwardConnections();
-                numBackConnections += n.getNumBackConnections(); // Includes the bias connection
-
-                if (details && n.hasForwardConnections()) {
-                    System.out.println( "    Fwd connections:" +
-                            n.debugShowFwdNet());
-                }
-
-                if (details && n.hasBackConnections()) {
-                    System.out.println( "    Back connections (incl. bias):" +
-                            n.debugShowBackNet());
-                }
-            }
-
-            if (!details) {
-                System.out.println( "   connections: " + numBackConnections + " back, "
-                     + numFwdConnections + " forward.");
-            }
-        }
+        DebugVisitor v = new DebugVisitor(details);
+        accept(v);
     }
 
     @Override
