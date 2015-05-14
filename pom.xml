@@ -3,7 +3,7 @@
 
     <groupId>neural2d-j</groupId>
     <artifactId>neural2d-j-parent</artifactId>
-    <version>0.0.0.1-SNAPSHOT</version>
+    <version>0.1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
   
@@ -18,7 +18,6 @@
     <modules>
         <module>Neural2D-J</module>
         <module>Neural2D-J-dist</module>
-        <module>jgl</module>
     </modules>
   
     <build>

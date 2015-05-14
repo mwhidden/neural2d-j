@@ -256,7 +256,12 @@ public abstract class LayerImpl implements Layer
     public <T> T executeCommand(Command<Neuron, T> action)
     {
         LayerTask<T> lAction = new LayerTask<>(action);
-        return pool.invoke(lAction).getResult();
+        JoinableResult<T> result = pool.invoke(lAction);
+        if(result != null){
+            return result.getResult();
+        } else {
+            return null;
+        }
     }
 
     private class LayerTask<T> extends RecursiveTask<JoinableResult<T>>

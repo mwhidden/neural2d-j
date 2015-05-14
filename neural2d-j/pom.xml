@@ -3,7 +3,7 @@
 
     <groupId>neural2d-j</groupId>
     <artifactId>neural2d-j</artifactId>
-    <version>0.0.0.1-SNAPSHOT</version>
+    <version>0.1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
   
@@ -13,7 +13,7 @@
     <parent>
         <groupId>neural2d-j</groupId>
         <artifactId>neural2d-j-parent</artifactId>
-        <version>0.0.0.1-SNAPSHOT</version>
+        <version>0.1.0.1-SNAPSHOT</version>
     </parent>
 
     <dependencies>

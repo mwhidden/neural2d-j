@@ -331,6 +331,7 @@ public abstract class NeuronImpl implements Neuron
         output = transferFunction.transfer(v.sum);
     }
 
+    @Override
     public String getName()
     {
         return "" + id;
