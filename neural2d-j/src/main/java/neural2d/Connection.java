@@ -3,10 +3,12 @@ package neural2d;
 /**
  * <p>
  * Copyright (c) 2015 Michael C. Whidden
+ *
  * @author Michael C. Whidden
  */
 public class Connection implements NetElement
 {
+
     private final Neuron fromNeuron;
     private final Neuron toNeuron;
     private double weight;
@@ -58,11 +60,9 @@ public class Connection implements NetElement
     @Override
     public void accept(NetElementVisitor v)
     {
-        if(v.visit(this)){
+        if (v.visit(this)) {
             // If we had child nodes, we would child.accept(v) here...
         }
     }
-
-
 
 }

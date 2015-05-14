@@ -14,16 +14,27 @@
               <include>neural2d-j:neural2d-j</include>
            </includes>
           <binaries>
+              <outputDirectory>lib/</outputDirectory>
               <!--outputDirectory>${project.parent.build.finalName}</outputDirectory-->
               <unpack>false</unpack>
               <fileMode>644</fileMode>
               <directoryMode>755</directoryMode>
               <dependencySets>
                 <dependencySet>
-                  <outputDirectory>lib</outputDirectory>
+                  <outputDirectory>lib/</outputDirectory>
                 </dependencySet>
               </dependencySets>
           </binaries>
       </moduleSet>
   </moduleSets>
+  <fileSets>
+      <fileSet>
+          <outputDirectory>bin/</outputDirectory>
+          <includes>
+              <include>
+                  neural2d.bat
+              </include>       
+          </includes>
+      </fileSet>
+  </fileSets>
 </assembly>

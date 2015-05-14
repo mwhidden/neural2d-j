@@ -1,5 +1,7 @@
 package neural2d.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import neural2d.ColorChannel;
 import neural2d.Matrix;
 import neural2d.TransferFunction;
@@ -11,11 +13,14 @@ import static neural2d.TransferFunction.TANH;
 
 /**
  * Copyright (c) 2015 Michael C. Whidden
+ *
  * @author Michael C. Whidden
  */
-public class LayerConfig {
+public class LayerConfig
+{
+
     private String layerName;
-    private String fromLayerName;
+    private final List<String> fromLayerNames = new ArrayList<>();
     private int numColumns, numRows;
     private ColorChannel channel; // applies only to input layer
     private int radiusX, radiusY;
@@ -23,6 +28,7 @@ public class LayerConfig {
     private TransferFunction tf;
     private Matrix convolveMatrix;
     private boolean isClassifier;
+    private final List<LayerConfig> fromLayerConfigs = new ArrayList<>();
 
     public void setTransferFunction(TransferFunction func)
     {
@@ -31,26 +37,31 @@ public class LayerConfig {
 
     public void setTransferFunction(String transferFunctionName)
     {
-        String tfName = transferFunctionName.toLowerCase();
-        if(tfName == null || tfName.isEmpty() || tfName.equals("tanh")){
+        if (transferFunctionName == null) {
             tf = TANH;
-        } else if(tfName.equals("logistic")){
-            tf = LOGISTIC;
-        } else if(tfName.equals("linear")){
-            // Allow 'linear' as an alias for 'identity'
-            tf = IDENTITY;
-        } else if(tfName.equals("ramp")){
-            tf = RAMP;
-        } else if(tfName.equals("gaussian")){
-            tf = GAUSSIAN;
-        } else if (tfName.equals("identity")){
-            tf = IDENTITY;
         } else {
-            throw new IllegalArgumentException("No such transfer function: " + tfName);
+            String tfName = transferFunctionName.toLowerCase();
+            if (tfName.isEmpty() || tfName.equals("tanh")) {
+                tf = TANH;
+            } else if (tfName.equals("logistic")) {
+                tf = LOGISTIC;
+            } else if (tfName.equals("linear")) {
+                // Allow 'linear' as an alias for 'identity'
+                tf = IDENTITY;
+            } else if (tfName.equals("ramp")) {
+                tf = RAMP;
+            } else if (tfName.equals("gaussian")) {
+                tf = GAUSSIAN;
+            } else if (tfName.equals("identity")) {
+                tf = IDENTITY;
+            } else {
+                throw new IllegalArgumentException("No such transfer function: " + tfName);
+            }
         }
     }
 
-    public LayerConfig(){
+    public LayerConfig()
+    {
         _clear();
     }
 
@@ -62,7 +73,7 @@ public class LayerConfig {
     private void _clear()
     {
         layerName = null;
-        fromLayerName = null;
+        fromLayerNames.clear();
         numColumns = numRows = 0;
         channel = null;
         radiusX = 1000000000;
@@ -91,14 +102,33 @@ public class LayerConfig {
         this.layerName = layerName;
     }
 
-    public String getFromLayerName()
+    /*public String getFromLayerName(int i)
+     {
+     return fromLayerNames.get(i);
+     }*/
+    public void addFromLayerName(String fromLayerName)
     {
-        return fromLayerName;
+        fromLayerNames.add(fromLayerName);
     }
 
-    public void setFromLayerName(String fromLayerName)
+    List<String> getFromLayerNames()
     {
-        this.fromLayerName = fromLayerName;
+        return fromLayerNames;
+    }
+
+    public List<LayerConfig> getFromLayerConfigs()
+    {
+        return fromLayerConfigs;
+    }
+
+    public void addFromLayerConfig(LayerConfig l)
+    {
+        fromLayerConfigs.add(l);
+    }
+
+    public int getNumFromLayers()
+    {
+        return fromLayerNames.size();
     }
 
     public int getNumRows()

@@ -89,7 +89,6 @@ public class TransferFunctionTest
                 0.0000001);
     }
 
-
     @Test
     public void testIdentity()
     {

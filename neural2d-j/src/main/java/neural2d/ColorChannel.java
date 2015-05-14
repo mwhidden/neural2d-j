@@ -1,10 +1,13 @@
 package neural2d;
 
 /**
-* Copyright Michael C. Whidden 2015
+ * Copyright Michael C. Whidden 2015
+ *
  * @author Michael C. Whidden
  */
-public enum ColorChannel {
+public enum ColorChannel
+{
+
     R,
     G,
     B,

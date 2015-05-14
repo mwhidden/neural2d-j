@@ -9,10 +9,12 @@ import neural2d.config.MatrixConfig;
  *
  * <p>
  * Copyright (c) 2015 Michael C. Whidden
+ *
  * @author Michael C. Whidden
  */
 public class Matrix
 {
+
     private final double[][] data;
     private final int numCols;
     private final int numRows;
@@ -20,7 +22,7 @@ public class Matrix
     public Matrix(int rows, int cols)
     {
         data = new double[rows][cols];
-        for(int i=0; i < rows; i++){
+        for (int i = 0; i < rows; i++) {
             data[i] = new double[cols];
         }
         this.numRows = rows;
@@ -32,13 +34,13 @@ public class Matrix
     {
         StringBuilder buff = new StringBuilder();
         buff.append("{");
-        for(int row = 0; row < numRows; row++){
-            if(row > 0){
+        for (int row = 0; row < numRows; row++) {
+            if (row > 0) {
                 buff.append(",");
             }
             buff.append("{");
-            for(int col = 0; col < numCols; col++){
-                if(col > 0){
+            for (int col = 0; col < numCols; col++) {
+                if (col > 0) {
                     buff.append(",");
                 }
                 buff.append(data[row][col]);
@@ -51,8 +53,8 @@ public class Matrix
 
     public void clear()
     {
-        for(int row = 0; row < numRows; row++){
-            for(int col = 0; col < numCols; col++){
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
                 data[row][col] = 0;
             }
         }
@@ -71,8 +73,8 @@ public class Matrix
 
     public void load(MatrixConfig cfg)
     {
-        for(int row = 0; row < numRows; row++){
-            for(int col = 0; col < numCols; col++){
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
                 data[row][col] = cfg.get(row, col);
             }
         }

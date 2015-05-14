@@ -1,8 +1,11 @@
 package neural2d;
 
+import java.text.MessageFormat;
+import java.util.logging.Level;
 
 /**
  * Copyright Michael C. Whidden 2015
+ *
  * @author Michael C. Whidden
  */
 public interface Neuron extends NetElement
@@ -52,8 +55,6 @@ public interface Neuron extends NetElement
 
     void setGradient(double f);
 
-    void setOutput(double f);
-
     // For backprop training
     void updateInputWeights(double eta, double alpha);
 
@@ -61,22 +62,23 @@ public interface Neuron extends NetElement
 
     void addForwardConnection(Connection c);
 
-    void setBiasConnection(Connection c);
+    String getName();
 
-    public static class AccumulateSquareWeightsCommand implements Command<Neuron,Double>
+    public static class AccumulateSquareWeightsCommand implements Command<Neuron, Double>
     {
+
         private static class SquareWeightsVisitor extends NetElementVisitor
         {
+
             double sqWeights = 0.0;
 
             @Override
             public boolean visit(Connection conn)
             {
                 double w = conn.getWeight();
-                sqWeights += (w*w);
+                sqWeights += (w * w);
                 return false;
             }
-
 
         }
 
@@ -95,11 +97,16 @@ public interface Neuron extends NetElement
         }
     }
 
-    public static class FeedForwardCommand implements Command<Neuron,Double>
+    static class FeedForwardCommand implements Command<Neuron, Double>
     {
+
         @Override
         public Command.DoubleResult execute(Neuron n)
         {
+            if (Neural2D.LOG.isLoggable(Level.FINEST)) {
+                Neural2D.LOG.finest(MessageFormat.format("Feeding forward to neuron {0}",
+                        n.getName()));
+            }
             n.feedForward();
             return new Command.DoubleResult(0.0);
         }
@@ -111,8 +118,9 @@ public interface Neuron extends NetElement
         }
     }
 
-    public static class InputWeightsCommand implements Command<Neuron,Double>
+    static class InputWeightsCommand implements Command<Neuron, Double>
     {
+
         private final double eta;
         private final double alpha;
 
@@ -135,138 +143,4 @@ public interface Neuron extends NetElement
             return true;
         }
     }
-
-    public static class AccumulateSquareErrorCommand implements Command<Neuron,Double>
-    {
-        private final Sample sample;
-
-        public AccumulateSquareErrorCommand(Sample sample)
-        {
-            this.sample = sample;
-        }
-
-        @Override
-        public Command.DoubleResult execute(Neuron n)
-        {
-            double delta = sample.getTargetVal(n.getRow(),n.getColumn()) - n.getOutput();
-            return new Command.DoubleResult(delta * delta);
-        }
-
-        @Override
-        public boolean canParallelize()
-        {
-            return true; // not parellizable
-        }
-    }
-
-    public static class MaxRowCol
-    {
-        double max;
-        int row, col;
-    }
-
-    public static class MaxRowColResult implements Command.JoinableResult<MaxRowCol>
-    {
-        private final MaxRowCol result;
-
-        public MaxRowColResult(MaxRowCol m)
-        {
-            this.result = m;
-        }
-
-        @Override
-        public void join(MaxRowCol o)
-        {
-            if(o.max > result.max){
-                result.max = o.max;
-                result.row = o.row;
-                result.col = o.col;
-            }
-        }
-
-        @Override
-        public MaxRowCol getResult()
-        {
-            return result;
-        }
-
-    }
-
-    public static class MaxNeuronCommand implements Command<Neuron,MaxRowCol>
-    {
-        private int maxCol, maxRow;
-
-        public int getMaxColumn()
-        {
-            return maxCol;
-        }
-
-        public int getMaxRow()
-        {
-            return maxRow;
-        }
-
-        @Override
-        public MaxRowColResult execute(Neuron n)
-        {
-            MaxRowCol m = new MaxRowCol();
-            m.max = n.getOutput();
-            m.col = n.getColumn();
-            m.row = n.getRow();
-            return new MaxRowColResult(m);
-        }
-
-        @Override
-        public boolean canParallelize()
-        {
-            return false; // not parellizable
-        }
-    }
-
-    public static class AssignInputsCommand implements Command<Neuron,Double>
-    {
-        private final Matrix inputs;
-        public AssignInputsCommand(Matrix inputs)
-        {
-            this.inputs = inputs;
-        }
-
-        @Override
-        public Command.DoubleResult execute(Neuron n)
-        {
-            n.setOutput(inputs.get(n.getRow(), n.getColumn()));
-            return new Command.DoubleResult(0.0);
-        }
-
-        @Override
-        public boolean canParallelize()
-        {
-            return true;
-        }
-
-    }
-
-    public static class CalculateGradientsCommand implements Command<Neuron,Double>
-    {
-        private final Matrix targets;
-        public CalculateGradientsCommand(Matrix targets)
-        {
-            this.targets = targets;
-        }
-
-        @Override
-        public Command.DoubleResult execute(Neuron n)
-        {
-            n.calcOutputGradients(targets.get(n.getRow(), n.getColumn()));
-            return new Command.DoubleResult(0.0);
-        }
-
-        @Override
-        public boolean canParallelize()
-        {
-            return true;
-        }
-    }
-
-
 }

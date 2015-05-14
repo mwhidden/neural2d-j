@@ -3,14 +3,17 @@ package neural2d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import neural2d.config.SampleConfig;
 
 /**
  * <p>
  * Copyright (c) 2015 Michael C. Whidden
+ *
  * @author Michael C. Whidden
  */
-public class SampleSet {
+public class SampleSet
+{
 
     private List<Sample> samples = new ArrayList<>();
 
@@ -28,21 +31,21 @@ public class SampleSet {
     {
         samples.addAll(config.getSamples());
 
-        System.out.println(samples.size() + " training samples initialized");
+        Neural2D.LOG.info(samples.size() + " training samples initialized");
     }
 
     // Randomize the order of the samples container.
     //
-    public void shuffle()
+    public void shuffle(Random rand)
     {
-        Collections.shuffle(samples);
+        Collections.shuffle(samples, rand);
     }
 
     // By clearing the cache, future image access will cause the pixel data to
     // be re-read and converted by whatever color conversion is in effect then.
     public void clearCache()
     {
-        for(Sample s: samples){
+        for (Sample s : samples) {
             s.clearCache();
         }
     }

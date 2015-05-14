@@ -11,17 +11,19 @@ import org.xml.sax.SAXParseException;
  *
  * <p>
  * Copyright (c) 2015 Michael C. Whidden
+ *
  * @author Michael C. Whidden
  */
 public class SAXErrorHandler implements ErrorHandler
 {
+
     SAXException exception = null;
     String warning = null;
 
     @Override
     public void warning(SAXParseException exception) throws SAXException
     {
-        if(this.warning != null){
+        if (this.warning != null) {
             this.warning += "\n";
         }
         this.warning += exception.getMessage();

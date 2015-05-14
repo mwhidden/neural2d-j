@@ -29,9 +29,11 @@ import org.xml.sax.SAXException;
  * <p>
  * <p>
  * Copyright (c) 2015 Michael C. Whidden
+ *
  * @author Michael C. Whidden
  */
-public class XMLConfig {
+public class XMLConfig
+{
 
     public static void writeDocument(Document dom, File file)
             throws ConfigurationException
@@ -60,8 +62,8 @@ public class XMLConfig {
         try {
             DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
 
-            DOMImplementationLS impl =
-                    (DOMImplementationLS)registry.getDOMImplementation("LS");
+            DOMImplementationLS impl
+                    = (DOMImplementationLS) registry.getDOMImplementation("LS");
 
             LSSerializer writer = impl.createLSSerializer();
             writer.setNewLine("\n");
@@ -86,13 +88,13 @@ public class XMLConfig {
         doc.appendChild(root);
         return doc;
         /*DOMImplementationRegistry registry;
-        try {
-            registry = DOMImplementationRegistry.newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
-            throw new ConfigurationException("XML internal error", ex);
-        }
-        DOMImplementation impl = registry.getDOMImplementation("XML");
-        return impl.createDocument(null, rootNode, null);*/
+         try {
+         registry = DOMImplementationRegistry.newInstance();
+         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException ex) {
+         throw new ConfigurationException("XML internal error", ex);
+         }
+         DOMImplementation impl = registry.getDOMImplementation("XML");
+         return impl.createDocument(null, rootNode, null);*/
     }
 
     protected static Document getDocument(String configFilename,
@@ -100,7 +102,7 @@ public class XMLConfig {
     {
         try {
             return getDocument(new File(configFilename), dtd);
-        } catch (ConfigurationException e){
+        } catch (ConfigurationException e) {
             throw new ConfigurationException("Error parsing file '" + configFilename + "'", e);
         }
     }
@@ -109,7 +111,7 @@ public class XMLConfig {
             String dtd) throws ConfigurationException
     {
         String configFilename = f.getPath();
-        if(!f.isFile()){
+        if (!f.isFile()) {
             throw new ConfigurationException("Input file '"
                     + configFilename + "' not found.");
         }
@@ -118,12 +120,12 @@ public class XMLConfig {
 
         try {
             fis = new FileInputStream(f);
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new ConfigurationException("Error opening file '" + configFilename + "'", e);
         }
         try {
             return getDocument(fis, dtd);
-        } catch (ConfigurationException e){
+        } catch (ConfigurationException e) {
             throw new ConfigurationException("Error parsing file '" + configFilename + "'", e);
         }
     }
@@ -139,10 +141,10 @@ public class XMLConfig {
             SAXErrorHandler eh = new SAXErrorHandler();
             parser.setErrorHandler(eh);
             parser.parse(new InputSource(input));
-            if(eh.exception != null){
+            if (eh.exception != null) {
                 throw new ConfigurationException("Parse error.", eh.exception);
             }
-            if(eh.warning != null){
+            if (eh.warning != null) {
                 System.err.println(eh.warning);
             }
         } catch (SAXException | IOException ex) {
@@ -161,7 +163,7 @@ public class XMLConfig {
         NodeList nl = elem.getChildNodes();
         List<Node> l = new ArrayList<>(nl.getLength());
         for (int i = 0; i < nl.getLength(); i++) {
-            if(nl.item(i).getNodeType() == Node.ELEMENT_NODE){
+            if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
                 l.add(nl.item(i));
             }
         }
@@ -190,17 +192,16 @@ public class XMLConfig {
             throws NumberFormatException
     {
         int ary[] = new int[2];
-        int idx = tempString.indexOf("x");
-        if(idx < 0){
+        int idx = tempString.indexOf('x');
+        if (idx < 0) {
             ary[0] = Integer.parseInt(tempString);
             ary[1] = 1;
         } else {
-            ary[0] = Integer.parseInt(tempString.substring(0,idx));
-            ary[1] = Integer.parseInt(tempString.substring(idx+1));
+            ary[0] = Integer.parseInt(tempString.substring(0, idx));
+            ary[1] = Integer.parseInt(tempString.substring(idx + 1));
         }
         return ary;
     }
-
 
     public XMLConfig()
     {
