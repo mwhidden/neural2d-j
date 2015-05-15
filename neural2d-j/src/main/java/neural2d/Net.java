@@ -586,31 +586,22 @@ public class Net implements NetElement
             this.action = action;
         }
 
-        private class NetTaskVisitor extends NetElementVisitor
-        {
-
-            JoinableResult<T> result;
-
-            @Override
-            public boolean visit(Layer n)
-            {
-                JoinableResult<T> res = action.execute(n);
-                if (result == null) {
-                    result = res;
-                } else {
-                    result.join(res);
-                }
-                return false;
-            }
-        }
-
         @Override
-        protected Command.JoinableResult<T> compute()
+        protected JoinableResult<T> compute()
         {
-            if (!action.canParallelize() || len < 128 /* && numSplits < numProcessors */) {
-                NetTaskVisitor v = new NetTaskVisitor();
-                accept(v);
-                return v.result;
+            // TODO: Find a smart way to decide on when
+            // to split more.
+            if (!action.canParallelize() || len < 3/* && numSplits < numProcessors */) {
+                JoinableResult<T> result = null;
+                for(int i=start; i < start+len; i++){
+                    JoinableResult<T> res = action.execute(layers.get(i));
+                    if (result == null) {
+                        result = res;
+                    } else {
+                        result.join(res);
+                    }
+                }
+                return result;
             } else {
                 NetTask<T> left, right;
                 int split = len / 2;

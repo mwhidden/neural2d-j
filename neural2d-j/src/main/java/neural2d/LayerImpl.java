@@ -450,31 +450,24 @@ public abstract class LayerImpl implements Layer
             this.action = action;
         }
 
-        private class LayerTaskVisitor extends NetElementVisitor
-        {
-
-            JoinableResult<T> result;
-
-            @Override
-            public boolean visit(Neuron n)
-            {
-                JoinableResult<T> res = action.execute(n);
-                if (result == null) {
-                    result = res;
-                } else {
-                    result.join(res);
-                }
-                return false;
-            }
-        }
-
         @Override
         protected JoinableResult<T> compute()
         {
+            // TODO: Find a smarter way to choose when to
+            // fork.
             if (!action.canParallelize() || numCols * numRows < 128 /* && numSplits < numProcessors */) {
-                LayerTaskVisitor v = new LayerTaskVisitor();
-                accept(v);
-                return v.result;
+                JoinableResult<T> result = null;
+                for(int col=startCol; col < startCol+numCols; col++){
+                    for(int row=startRow; row < startRow+numRows; row++){
+                        JoinableResult<T> res = action.execute(getNeuron(row,col));
+                        if (result == null) {
+                            result = res;
+                        } else {
+                            result.join(res);
+                        }
+                    }
+                }
+                return result;
             } else {
                 LayerTask<T> left, right;
                 // First split horizontally, preserving rows, since
