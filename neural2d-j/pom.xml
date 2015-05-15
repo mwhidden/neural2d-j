@@ -29,9 +29,9 @@
             <version>1.2.2</version>
         </dependency>
         <dependency>
-            <groupId>neural2d-j</groupId>
+            <groupId>jgl</groupId>
             <artifactId>jgl</artifactId>
-            <version>0.0.0.1-SNAPSHOT</version>
+            <version>2.4b4</version>
         </dependency>
     </dependencies>
 

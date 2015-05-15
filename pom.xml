@@ -18,6 +18,7 @@
     <modules>
         <module>Neural2D-J</module>
         <module>Neural2D-J-dist</module>
+        <module>jgl</module>
     </modules>
   
     <build>

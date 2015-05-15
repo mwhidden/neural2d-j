@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Used for UNIX environments
+# /usr/local/j2sdk1.4.2_04/bin/java -classpath jgl.jar:. $1
+
+# Used for Cygwin environment
+/usr/local/j2sdk1.4.2_04/bin/java -classpath jgl.jar\;. $1
