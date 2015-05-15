@@ -89,76 +89,7 @@ public abstract class NeuronImpl implements Neuron
         return layer;
     }
 
-    // For backprop training
-    // The error gradient of a hidden-layer neuron is equal to the derivative
-    // of the activation function of the hidden layer evaluated at the
-    // local output of the neuron times the sum of the product of
-    // the primary outputs times their associated hidden-to-output weights.
-    //
-    @Override
-    public void calcHiddenGradients()
-    {
-        double dow = sumDOW_nextLayer();
-        // neural 2d formula
-        //gradient = dow * transferFunction.derivative().transfer(output);
-        // heaton research formula
-        gradient = dow * transferFunction.derivative().transfer(inputSum);
-    }
 
-    // For backprop training
-    // The error gradient of an output-layer neuron is equal to the target (desired)
-    // value minus the computed output value, times the derivative of
-    // the output-layer activation function evaluated at the computed output value.
-    //
-    // On an output neuron with a, say, LINEAR transfer function, if the
-    // desired output (after transfer function)
-    // is 1.0, and the current output (after transfer function) is -0.5, then
-    // the error is 1.5 (because the output is -0.5, and the error is
-    // desiredOutput - output). The gradient tells us how much we need to
-    // change the output to achieve the desired output, extrapolating from the
-    // slope (derivative) of the transfer function at the current output.
-    // For the example neuron, the slope is 1, so we need to change the input
-    // by (surprise!) 1.5 to achieve the desired output.
-    //
-    // If i is the input, d the desired output, o the current output,
-    // g the gradient,
-    // tf the transfer function, and tf' the derivative of tf, then:
-    // o = tf(i)
-    // d = tf(i+g)
-    // We need to approximate g.
-    // We can approximate g as tf(o) + tf'(d-o)
-    // For the given example:
-    // g = tf(o) + tf'(d-o)
-    // g =
-    // o = tf(i) = -0.5
-    // d = tf(g-0.5) = g-0.5
-    //
-    // If we  were to infinitesimally change the
-    // input, the gradient is the rate of change in the error, which is just
-    // the derivative(slope) of the transfer function evaluated at the output.
-    // Again, if the input changed by d, the new output is approximated by
-    // tf(input) + d*tf'(output). The gradient is this change in the output,
-    // which is the d*tf'(output) term. In the example output neuron above,
-    // the gradient would be
-    @Override
-    public void calcOutputGradients(double targetVal)
-    {
-        if (Neural2D.LOG.isLoggable(Level.FINEST)) {
-            Neural2D.LOG.finest("Calculate output gradient for neuron "
-                    + getName());
-        }
-        double delta = targetVal - output;
-        // Heaton Research value
-        gradient = delta * transferFunction.derivative().transfer(inputSum);
-        // neural2d formula
-        //gradient = delta * transferFunction.derivative().transfer(output);
-        if (Neural2D.LOG.isLoggable(Level.FINEST)) {
-            Neural2D.LOG.finest(MessageFormat.format("gradient (node delta) is "
-                    + "error * dTF(inputSum) = {0} * dTF({1}) = {0} x {2} = {3}",
-                    delta, inputSum, transferFunction.derivative().transfer(inputSum),
-                    gradient));
-        }
-    }
 
     @Override
     public void accept(NetElementVisitor v)
@@ -263,9 +194,39 @@ public abstract class NeuronImpl implements Neuron
     }
 
     @Override
+    public boolean isForwardConnectedTo(Neuron n)
+    {
+        IsForwardConnectedVisitor v = new IsForwardConnectedVisitor(n);
+        accept(v);
+        return v.isConnected;
+    }
+
+    @Override
     public String toString()
     {
         return "Neuron(" + id + ")";
+    }
+
+    private class IsForwardConnectedVisitor extends NetElementVisitor
+    {
+        boolean isConnected = false;
+        private final Neuron toNeuron;
+
+        public IsForwardConnectedVisitor(Neuron toNeuron)
+        {
+            this.toNeuron = toNeuron;
+        }
+
+        @Override
+        public boolean visit(Connection conn)
+        {
+            if(!isConnected){
+                if(conn.getToNeuron() == toNeuron){
+                    isConnected = true;
+                }
+            }
+            return false;
+        }
     }
 
     private static class DebugVisitor extends NetElementVisitor

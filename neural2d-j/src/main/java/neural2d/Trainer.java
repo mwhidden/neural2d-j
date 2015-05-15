@@ -211,7 +211,7 @@ class Trainer
                             Neural2D.LOG.finest("Updating the weight for connections into layer " + layer.getName());
                         }
 
-                        layer.executeCommand(new Neuron.InputWeightsCommand(eta, alpha));
+                        layer.executeCommand(new InputWeightsCommand(eta, alpha));
                     }
             }
             return false; //don't deepen
@@ -223,8 +223,34 @@ class Trainer
             // gradients are calculated from output layer toward input layer.
             return NetElementVisitor.Direction.BACKWARD;
         }
-
     }
+
+    private static class InputWeightsCommand implements Command<Neuron, Double>
+    {
+
+        private final double eta;
+        private final double alpha;
+
+        public InputWeightsCommand(double eta, double alpha)
+        {
+            this.eta = eta;
+            this.alpha = alpha;
+        }
+
+        @Override
+        public Command.DoubleResult execute(Neuron n)
+        {
+            n.updateInputWeights(eta, alpha);
+            return new Command.DoubleResult(0.0);
+        }
+
+        @Override
+        public boolean canParallelize()
+        {
+            return true;
+        }
+    }
+
 
     private static class CalculateGradientsVisitor extends NetElementVisitor
     {
@@ -259,5 +285,32 @@ class Trainer
             return NetElementVisitor.Direction.BACKWARD;
         }
     }
+
+    private static class CalculateGradientsCommand implements Command<Neuron, Double>
+    {
+        private final Matrix targets;
+
+        public CalculateGradientsCommand(Matrix targets)
+        {
+            this.targets = targets;
+        }
+
+        @Override
+        public Command.DoubleResult execute(Neuron n)
+        {
+            // Input to an output layer neuron comes from the
+            // targets. To any other neuron, the target value
+            // is ignored.
+            n.calcGradient(targets.get(n.getRow(), n.getColumn()));
+            return new Command.DoubleResult(0.0);
+        }
+
+        @Override
+        public boolean canParallelize()
+        {
+            return true;
+        }
+    }
+
 
 }

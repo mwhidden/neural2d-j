@@ -39,6 +39,20 @@ public interface Layer extends NetElement
     int getNumRows();
 
     /**
+     * Returns true if this layer receives bias connections.
+     * @return true if this layer receives bias connections.
+     */
+    boolean acceptsBias();
+
+    /**
+     * Connects the neurons of this layer to that of the next
+     * layer.
+     * @param layer
+     * @return the number of new connections created.
+     */
+    int connectTo(Layer layer);
+
+    /**
      * Each neuron in this layer will be connected to one or more neurons in the
      * <i>previous</i> layer which lie in an ellipse or rectangle centered on a
      * neuron in the previous layer whose x,y location matches the neuron in
@@ -46,6 +60,7 @@ public interface Layer extends NetElement
      *
      * @return
      */
+    // Remove. Move connection logic to layer
     int getRadiusX();
 
     /**
@@ -56,6 +71,7 @@ public interface Layer extends NetElement
      *
      * @return
      */
+    // Remove. Move connection logic to layer
     int getRadiusY();
 
     TransferFunction getTransferFunction();
@@ -66,8 +82,10 @@ public interface Layer extends NetElement
      *
      * @return
      */
+    // TODO: Decorate?
     boolean isClassifier();
 
+    // TODO: Decorate?
     boolean isConvolutionLayer();
 
     /**
@@ -77,6 +95,7 @@ public interface Layer extends NetElement
      *
      * @return
      */
+    // Remove. Move connection logic to layer
     boolean isRectangular();
 
     int size();

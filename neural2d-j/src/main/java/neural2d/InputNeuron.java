@@ -10,7 +10,6 @@ package neural2d;
  */
 class InputNeuron extends NeuronImpl
 {
-
     public InputNeuron(Layer layer, int row, int col)
     {
         super(TransferFunction.IDENTITY, layer, row, col);
@@ -19,5 +18,11 @@ class InputNeuron extends NeuronImpl
     public void setOutput(double f)
     {
         this.output = f;
+    }
+
+    @Override
+    public void calcGradient(double target)
+    {
+        // No gradient on input neurons
     }
 }

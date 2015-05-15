@@ -10,21 +10,7 @@ import java.util.logging.Level;
  */
 public interface Neuron extends NetElement
 {
-
-    // For backprop training
-    // The error gradient of a hidden-layer neuron is equal to the derivative
-    // of the activation function of the hidden layer evaluated at the
-    // local output of the neuron times the sum of the product of
-    // the primary outputs times their associated hidden-to-output weights.
-    //
-    void calcHiddenGradients();
-
-    // For backprop training
-    // The error gradient of an output-layer neuron is equal to the target (desired)
-    // value minus the computed output value, times the derivative of
-    // the output-layer activation function evaluated at the computed output value.
-    //
-    void calcOutputGradients(double targetVal);
+    void calcGradient(double target);
 
     // Propagate the net inputs to the outputs
     // To feed forward an individual neuron, we'll sum the weighted inputs, then pass that
@@ -63,6 +49,13 @@ public interface Neuron extends NetElement
     void addForwardConnection(Connection c);
 
     String getName();
+
+    /**
+     * Returns true if this neuron has a forward connection to the given neuron.
+     * @param n
+     * @return true if this neuron has a forward connection to the given neuron.
+     */
+    boolean isForwardConnectedTo(Neuron n);
 
     public static class AccumulateSquareWeightsCommand implements Command<Neuron, Double>
     {
@@ -118,29 +111,4 @@ public interface Neuron extends NetElement
         }
     }
 
-    static class InputWeightsCommand implements Command<Neuron, Double>
-    {
-
-        private final double eta;
-        private final double alpha;
-
-        public InputWeightsCommand(double eta, double alpha)
-        {
-            this.eta = eta;
-            this.alpha = alpha;
-        }
-
-        @Override
-        public Command.DoubleResult execute(Neuron n)
-        {
-            n.updateInputWeights(eta, alpha);
-            return new Command.DoubleResult(0.0);
-        }
-
-        @Override
-        public boolean canParallelize()
-        {
-            return true;
-        }
-    }
 }

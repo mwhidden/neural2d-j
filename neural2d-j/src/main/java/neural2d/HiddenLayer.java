@@ -10,14 +10,20 @@ import neural2d.config.LayerConfig;
 public class HiddenLayer extends LayerImpl
 {
 
-    private HiddenLayer(LayerConfig params)
+    private HiddenLayer(Net net, LayerConfig params)
     {
-        super(params);
+        super(net, params);
     }
 
-    public static Layer createLayer(LayerConfig params)
+    @Override
+    public boolean acceptsBias()
     {
-        Layer l = new HiddenLayer(params);
+        return true;
+    }
+
+    public static Layer createLayer(Net net, LayerConfig params)
+    {
+        Layer l = new HiddenLayer(net, params);
         l.createNeurons();
         return l;
     }
@@ -28,6 +34,7 @@ public class HiddenLayer extends LayerImpl
         return LayerType.HIDDEN;
     }
 
+
     @Override
     public Command<Neuron, Double> getFeedForwardCommand(Matrix inputData)
     {
@@ -37,20 +44,20 @@ public class HiddenLayer extends LayerImpl
     @Override
     public Command<Neuron, Double> getCalculateGradientsCommand(Matrix targeVals)
     {
-        return new CalculateHiddenGradientsCommand();
+        return new CalculateGradientsCommand();
     }
 
-    private static class CalculateHiddenGradientsCommand implements Command<Neuron, Double>
+    private static class CalculateGradientsCommand implements Command<Neuron, Double>
     {
 
-        public CalculateHiddenGradientsCommand()
+        public CalculateGradientsCommand()
         {
         }
 
         @Override
         public Command.DoubleResult execute(Neuron n)
         {
-            n.calcHiddenGradients();
+            n.calcGradient(0.0); // parameter is ignored on hidden layer neurons
             return new Command.DoubleResult(0.0);
         }
 

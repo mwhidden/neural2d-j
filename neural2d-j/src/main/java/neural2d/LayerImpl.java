@@ -18,13 +18,17 @@ public abstract class LayerImpl implements Layer
 {
 
     private final LayerConfig params;
+    private final String name;
     private final List<Neuron> neurons; // 2d array, flattened index = row * numCols + col
     private final int numNeurons;
     private final ForkJoinPool pool = new ForkJoinPool();
+    protected final Net net;
 
-    public LayerImpl(LayerConfig params)
+    public LayerImpl(Net net, LayerConfig params)
     {
+        this.net = net;
         this.params = params;
+        this.name = params.getLayerName();
         this.numNeurons = params.getNumRows() * params.getNumColumns();
         this.neurons = new ArrayList<>(numNeurons);
     }
@@ -39,6 +43,11 @@ public abstract class LayerImpl implements Layer
                 neurons.add(createNeuron(row, col));
             }
         }
+    }
+
+    protected double randomDouble()
+    {
+        return net.randomDouble();
     }
 
     @Override
@@ -132,6 +141,154 @@ public abstract class LayerImpl implements Layer
         return params.getChannel();
     }
 
+    @Override
+    public int connectTo(Layer toLayer)
+    {
+        // If layerFrom is layerTo, it means we're making input neurons
+        // that have no input connections to the neurons. Else, we must make connections
+        // to the source neurons and, for classic neurons, to a bias input:
+        int numConnections = 0;
+        for (int row = 0; row < toLayer.getNumRows(); ++row) {
+            for (int col = 0; col < toLayer.getNumColumns(); ++col) {
+                numConnections += connectToNeuron(toLayer, row, col);
+            }
+        }
+        return numConnections;
+    }
+
+    // Assuming an ellipse centered at 0,0 and aligned with the global axes, returns
+    // a positive value if x,y is outside the ellipse; 0.0 if on the ellipse;
+    // negative if inside the ellipse.
+    //
+    private double elliptDist(double x, double y, double radiusX, double radiusY)
+    {
+        assert (radiusX >= 0.0 && radiusY >= 0.0);
+        return radiusY * radiusY * x * x + radiusX * radiusX * y * y - radiusX * radiusX * radiusY * radiusY;
+    }
+
+    private int clip(int val, int min, int max)
+    {
+        val = Math.max(min, val);
+        val = Math.min(max, val);
+        return val;
+    }
+
+    // This creates the initial set of connections for a layer of neurons. (If the same layer
+    // appears again in the topology config file, those additional connections must be added
+    // to existing connections by calling addToLayer() instead of this function.
+    //
+    // Neurons can be "regular" neurons, or convolution nodes. If a convolution matrix is
+    // defined for the layer, the neurons in that layer will be connected to source neurons
+    // in a rectangular pattern defined by the matrix dimensions. No bias connections are
+    // created for convolution nodes. Convolution nodes ignore any radius parameter.
+    // For convolution nodes, the transfer function is set to be the identity function.
+    //
+    // For regular neurons,
+    // the location of the destination neuron is projected onto the neurons of the source
+    // layer. A shape is defined by the radius parameters, and is considered to be either
+    // rectangular or elliptical (depending on the value of projectRectangular below).
+    // A radius of 0,0 connects a single source neuron in the source layer to this
+    // destination neuron. E.g., a radius of 1,1, if projectRectangular is true, connects
+    // nine neurons from the source layer in a 3x3 block to this destination neuron.
+    //
+    // Each Neuron object holds a container of Connection objects for all the source
+    // inputs to the neuron. Each neuron also holds a container of pointers to Connection
+    // objects in the forward direction. Those points point to Container objects in
+    // and owned by neurons in other layers. I.e., the master copies of all connection are
+    // in the containers of back connections; forward connection pointers refer to
+    // back connection records in other neurons.
+    //
+    private int connectToNeuron(Layer layerTo, int toRow, int toCol)
+    {
+        // TODO: have the 'to layer' let us know which
+        // neurons on our side it wants to hear from.
+        Neuron toNeuron = layerTo.getNeuron(toRow, toCol);
+        int numCols = layerTo.getNumColumns();
+        int numRows = layerTo.getNumRows();
+        int numConns = 0;
+        assert (numCols > 0 && numRows > 0);
+
+        // Calculate the normalized [0..1] coordinates of our neuron:
+        double normalizeCol = ((float) toCol / numCols) + (1.0 / (2 * numCols));
+        double normalizedRow = ((float) toRow / numRows) + (1.0 / (2 * numRows));
+
+        // Calculate the coords of the nearest neuron in the "from" layer.
+        // The calculated coords are relative to the "from" layer:
+        int lFromCol = (int) (normalizeCol * getNumColumns()); // should we round off instead of round down?
+        int lFromRow = (int) (normalizedRow * getNumRows());
+
+        // Calculate the rectangular window into the "from" layer:
+        int minCol, maxCol;
+        int minRow, maxRow;
+
+        if (layerTo.isConvolutionLayer()) {
+            //ymin = lfromY - params.convolveMatrix.get(0).size() / 2;
+            //ymax = ymin + params.convolveMatrix.get(0).size() - 1;
+            //xmin = lfromX - params.convolveMatrix.size() / 2;
+            //xmax = xmin + params.convolveMatrix.size() - 1;
+            throw new UnsupportedOperationException("TODO");
+        } else {
+            minCol = lFromCol - layerTo.getRadiusX();
+            maxCol = lFromCol + layerTo.getRadiusX();
+            minRow = lFromRow - layerTo.getRadiusY();
+            maxRow = lFromRow + layerTo.getRadiusY();
+        }
+
+        // Clip to the layer boundaries:
+        minCol = clip(minCol, 0, getNumColumns() - 1);
+        minRow = clip(minRow, 0, getNumRows() - 1);
+        maxCol = clip(maxCol, 0, getNumColumns() - 1);
+        maxRow = clip(maxRow, 0, getNumRows() - 1);
+
+        // Now (xmin,xmax,ymin,ymax) defines a rectangular subset of neurons in a previous layer.
+        // We'll make a connection from each of those neurons in the previous layer to our
+        // neuron in the current layer.
+        // We will also check for and avoid duplicate connections. Duplicates are mostly harmless,
+        // but unnecessary. Duplicate connections can be formed when the same layer name appears
+        // more than once in the topology config file with the same "from" layer if the projected
+        // rectangular or elliptical areas on the source layer overlap.
+        double centerCol = (minCol + maxCol) / 2.0;
+        double centerRow = (minRow + maxRow) / 2.0;
+        int maxNumSourceNeurons = ((maxCol - minCol) + 1) * ((maxRow - minRow) + 1);
+
+        for (int y = minRow; y <= maxRow; ++y) {
+            for (int x = minCol; x <= maxCol; ++x) {
+                if (!layerTo.isConvolutionLayer() && !layerTo.isRectangular() && elliptDist(centerCol - x, centerRow - y,
+                        layerTo.getRadiusX(), layerTo.getRadiusY()) >= 1.0) {
+                    continue; // Skip this location, it's outside the ellipse
+                }
+
+                if (layerTo.isConvolutionLayer() && layerTo.getConvolveMatrix().get(x - minCol, y - minRow) == 0.0) {
+                    // Skip this connection because the convolve matrix weight is zero:
+                    continue;
+                }
+                Neuron fromNeuron = getNeuron(x, y);
+
+                if (fromNeuron.isForwardConnectedTo(toNeuron)) {
+                    Neural2D.LOG.finer("Skipping a dupe connection from " + fromNeuron + " to " + toNeuron);
+                    break; // Skip this connection, proceed to the next
+                } else {
+                    // Add a new Connection record to the main container of connections:
+                    Connection conn = new Connection(fromNeuron, toNeuron);
+                    fromNeuron.addForwardConnection(conn);
+                    toNeuron.addBackConnection(conn);
+                    //connections.add(conn);
+                    numConns++;
+
+                    // Initialize the weight of the connection:
+                    if (layerTo.isConvolutionLayer()) {
+                        conn.setWeight(layerTo.getConvolveMatrix().get(x - minCol, y - minRow));
+                    } else {
+                        //connections.back().weight = (randomDouble() - 0.5) / maxNumSourceNeurons;
+                        conn.setWeight(((randomDouble() * 2.0) - 1.0) / Math.sqrt(maxNumSourceNeurons));
+                    }
+                }
+            }
+        }
+        return numConns;
+    }
+
+
     /**
      * Creates a neuron in this layer at the given x,y location and returns it.
      *
@@ -174,7 +331,7 @@ public abstract class LayerImpl implements Layer
     @Override
     public String getName()
     {
-        return params.getLayerName();
+        return name;
     }
 
     @Override

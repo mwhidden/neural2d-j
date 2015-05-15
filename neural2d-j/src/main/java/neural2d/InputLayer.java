@@ -13,14 +13,20 @@ import neural2d.config.LayerConfig;
 public class InputLayer extends LayerImpl
 {
 
-    private InputLayer(LayerConfig params)
+    private InputLayer(Net net, LayerConfig params)
     {
-        super(params);
+        super(net, params);
     }
 
-    public static Layer createLayer(LayerConfig params)
+    @Override
+    public boolean acceptsBias()
     {
-        Layer l = new InputLayer(params);
+        return false;
+    }
+
+    public static Layer createLayer(Net net, LayerConfig params)
+    {
+        Layer l = new InputLayer(net, params);
         l.createNeurons();
         return l;
     }

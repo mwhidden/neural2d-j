@@ -24,4 +24,10 @@ public class BiasNeuron extends NeuronImpl
         return "BiasNeuron(" + id + ")";
     }
 
+    @Override
+    public void calcGradient(double target)
+    {
+        // no gradient on bias neurons
+    }
+
 }

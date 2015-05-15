@@ -13,16 +13,22 @@ import neural2d.config.LayerConfig;
 public class OutputLayer extends LayerImpl
 {
 
-    private OutputLayer(LayerConfig params)
+    private OutputLayer(Net net, LayerConfig params)
     {
-        super(params);
+        super(net, params);
     }
 
-    public static Layer createLayer(LayerConfig params)
+    public static Layer createLayer(Net net, LayerConfig params)
     {
-        Layer l = new OutputLayer(params);
+        Layer l = new OutputLayer(net, params);
         l.createNeurons();
         return l;
+    }
+
+    @Override
+    public boolean acceptsBias()
+    {
+        return true;
     }
 
     @Override
@@ -56,7 +62,7 @@ public class OutputLayer extends LayerImpl
         @Override
         public Command.DoubleResult execute(Neuron n)
         {
-            n.calcOutputGradients(targets.get(n.getRow(), n.getColumn()));
+            n.calcGradient(targets.get(n.getRow(), n.getColumn()));
             return new Command.DoubleResult(0.0);
         }
 
