@@ -2,6 +2,7 @@ package neural2d;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import neural2d.config.ConfigurationException;
@@ -23,7 +24,7 @@ public class Neural2D
 
     private Mode mode = null;
     private File nom = null, outputFile = null, inputFile = null;
-    private boolean force = false, plot;
+    private boolean force = false, plot = false, model = false;
     private Net myNet;
     private NetConfig config;
     private long randSeed = System.currentTimeMillis();
@@ -66,7 +67,8 @@ public class Neural2D
                 + "        --seed/-s    specify an integer seed to the random number generator.\n"
                 + "                     This allows a training run to be reliably reproduced.\n"
                 + "                     If not provided, the current time is used as a seed.\n"
-                + "        --plot/-p    Plots the function of the net. Valid only for nets with\n"
+                + "        --model/-m   Display the net as a balls-and-sticks model.\n"
+                + "        --plot/-p    Plot the function of the net. Valid only for nets with\n"
                 + "                     1x1,1x2 or 2x1 inputs and 1x1 output.\n"
                 + "        --verbose/-v verbose output\n"
                 + "        --help/-h    display this message\n"
@@ -96,6 +98,9 @@ public class Neural2D
                     } else if ("--plot".equals(arg)
                             || "-p".equals(arg)) {
                         plot = true;
+                    } else if ("--model".equals(arg)
+                            || "-m".equals(arg)) {
+                        model = true;
                     } else if ("--force".equals(arg)
                             || "-f".equals(arg)) {
                         force = true;
@@ -175,7 +180,7 @@ public class Neural2D
 
         // If this device has a display, show a nice 3d view of the
         // net topology
-        if (!GraphicsEnvironment.isHeadless()) {
+        if (!GraphicsEnvironment.isHeadless() && model) {
             NetDisplay nv = new NetDisplay(myNet);
             nv.init();
             nv.startAnimate();
@@ -199,6 +204,13 @@ public class Neural2D
             myNet.train(samples, disp);
             LOG.info("Solved!   -- Saving weights...");
             config.writeTrainedNOM(myNet, outputFile);
+            if(plot || model){
+                System.out.println("Press any key to exit.");
+                try {
+                    System.in.read();
+                } catch (IOException ex) {
+                }
+            }
         } else if (mode == Mode.VALIDATE) {
             if (myNet.validate(samples)) {
                 LOG.info("Validition succeeded.");

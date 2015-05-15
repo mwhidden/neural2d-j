@@ -8,7 +8,10 @@ import neural2d.Net;
 
 public class NetDisplay extends GLCanvas
 {
-
+    // TODO: Change color of connections according to their weight
+    // Change color of neurons according to their type (input, output,
+    // hidden, convolution, pooling...).
+    // TODO: Shadows?
     private static final float lineMatDiffuse[] = {0.0f, 0.6f, 0.0f, 1.0f};
     private static final float lineMatSpecular[] = {1.0f, 1.0f, 1.0f, 1.0f};
     private static final float lineMatShininess[] = {10.0f};

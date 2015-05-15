@@ -286,31 +286,4 @@ class Trainer
         }
     }
 
-    private static class CalculateGradientsCommand implements Command<Neuron, Double>
-    {
-        private final Matrix targets;
-
-        public CalculateGradientsCommand(Matrix targets)
-        {
-            this.targets = targets;
-        }
-
-        @Override
-        public Command.DoubleResult execute(Neuron n)
-        {
-            // Input to an output layer neuron comes from the
-            // targets. To any other neuron, the target value
-            // is ignored.
-            n.calcGradient(targets.get(n.getRow(), n.getColumn()));
-            return new Command.DoubleResult(0.0);
-        }
-
-        @Override
-        public boolean canParallelize()
-        {
-            return true;
-        }
-    }
-
-
 }
